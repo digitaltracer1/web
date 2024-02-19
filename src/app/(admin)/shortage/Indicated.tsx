@@ -1,26 +1,29 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 import {
+  Table,
   TableHeader,
   TableHead,
   TableBody,
   TableRow,
   TableCell,
 } from '@/components/ui/table'
-import { Table } from 'lucide-react'
 import React from 'react'
 
 export default async function Indicated() {
   const result = await fetch(
-    'https://digitaltracer.ddns.com.br/v1/siac/shortage',
+    'https://digitaltracer.ddns.com.br/v1/siac/indicated',
   )
 
-  const indicated = await result.json()
+  const { shortages: indicated } = await result.json()
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-4">
       <div className="border rounded-lg p-2">
         <Table>
           <TableHeader>
-            <TableHead>QTD</TableHead>
+            <TableHead>Indice</TableHead>
             <TableHead>SKU</TableHead>
             <TableHead>Data da solicitação</TableHead>
             <TableHead>Similares</TableHead>
