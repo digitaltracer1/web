@@ -145,7 +145,7 @@ export default function Daily() {
         <div className="border rounded-lg p-2">
           <Table>
             <TableHeader>
-              <TableHead>QTD</TableHead>
+              <TableHead>Indice</TableHead>
               <TableHead>SKU</TableHead>
               <TableHead>Estoque</TableHead>
               <TableHead>Data da ultima saida</TableHead>
