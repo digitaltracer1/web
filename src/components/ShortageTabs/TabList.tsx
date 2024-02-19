@@ -6,7 +6,7 @@ import { TabItem } from './TabItem'
 export default function TabList({ currentTab }: { currentTab: string }) {
   return (
     <div className="fixed w-full bg-white dark:bg-zinc-900 top-0 z-20  ">
-      <ScrollArea.Root className="w-full mt-10" type="scroll">
+      <ScrollArea.Root className="w-full mt-20 lg:mt-10" type="scroll">
         <ScrollArea.Viewport className="w-full overflow-x-scroll">
           <Tabs.List className=" mt-6 flex w-full items-center gap-4 border-b border-zinc-200 dark:border-zinc-700">
             <TabItem
