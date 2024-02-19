@@ -9,7 +9,7 @@ interface AuthLayoutProps {
 
 export default function TabContent({ value, children }: AuthLayoutProps) {
   return (
-    <div className="mt-24">
+    <div className="mt-[4rem] lg:mt-20">
       <Tabs.Content value={value}>{children}</Tabs.Content>
     </div>
   )

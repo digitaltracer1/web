@@ -84,7 +84,7 @@ export default function Daily() {
 
   return (
     <>
-      <div className="sticky top-[6rem] py-4 bg-white dark:bg-zinc-900 z-10">
+      <div className="sticky top-[6rem]  bg-white dark:bg-zinc-900 z-10">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
