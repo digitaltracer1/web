@@ -2,7 +2,7 @@ import TabContent from './TabContent'
 import TabRoot from './TabsRoot'
 
 import Daily from '@/app/(admin)/shortage/(daily)/Daily'
-import Indicated from '@/app/(admin)/shortage/Indicated'
+import Indicated from '@/app/(admin)/shortage/(indicated)/Indicated'
 import Manager from '@/app/(admin)/shortage/Manager'
 import Opportunity from '@/app/(admin)/shortage/Opportunity'
 

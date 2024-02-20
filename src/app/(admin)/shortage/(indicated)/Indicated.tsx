@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-
+import React from 'react'
 import {
   Table,
   TableHeader,
@@ -9,7 +9,6 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui/table'
-import React from 'react'
 
 export default async function Indicated() {
   const result = await fetch(

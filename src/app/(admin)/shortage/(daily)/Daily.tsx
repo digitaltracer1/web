@@ -72,6 +72,7 @@ export default function Daily() {
     // console.log(
     //   resultdata.shortages.map((shortage) => ({
     //     sku: shortage.NUM_FAB,
+    //     cost: shortage.integration.product.cost,
     //     product_id: shortage.integration.product.product_id,
     //     similares: shortage.integration.product?.products_connect?.products.map(
     //       (product) => product.product_id,
@@ -147,7 +148,7 @@ export default function Daily() {
             <TableHeader>
               <TableHead>Indice</TableHead>
               <TableHead>SKU</TableHead>
-              <TableHead>Estoque</TableHead>
+              <TableHead>Ultimo custo</TableHead>
               <TableHead>Data da ultima saida</TableHead>
               <TableHead>Similares</TableHead>
             </TableHeader>
@@ -157,7 +158,16 @@ export default function Daily() {
                     <TableRow key={item.NUM_FAB}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{item.NUM_FAB}</TableCell>
-                      <TableCell>{item.SALDO}</TableCell>
+                      <TableCell>
+                        {' '}
+                        {item.integration?.product?.cost?.toLocaleString(
+                          'pt-BR',
+                          {
+                            style: 'currency',
+                            currency: 'BRL',
+                          },
+                        )}
+                      </TableCell>
                       <TableCell>{item.MOV}</TableCell>
                       <TableCell width={20}>
                         {item.integration?.product?.products_connect?.products?.map(
