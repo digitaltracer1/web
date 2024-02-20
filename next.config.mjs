@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental:{
+    serverActions:{
+      allowedOrigins: ["localhost:3002","digitaltracer.ddns.com.br"]
+    }
+  },
   async headers() {
     return [
       {
