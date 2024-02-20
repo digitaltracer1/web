@@ -1,7 +1,7 @@
 import { revalidateTag } from 'next/cache'
-import DemoPage from './(sale-by-seller)/page'
 import ComboBoxSeller, { ICombobox } from './ComboboxSeller'
 import { cookies } from 'next/headers'
+import TableSaleBySeller from './(sale-by-seller)/table'
 
 export default async function Page() {
   async function handleChangeSeller(seller: ICombobox | null) {
@@ -20,7 +20,7 @@ export default async function Page() {
     <>
       <ComboBoxSeller selectSeller={handleChangeSeller} />
 
-      <DemoPage />
+      <TableSaleBySeller />
     </>
   )
 }

@@ -30,7 +30,7 @@ async function getData(): Promise<ISaleBySeller[]> {
   return data.sale
 }
 
-export default async function DemoPage() {
+export default async function TableSaleBySeller() {
   const data = await getData()
 
   return (
