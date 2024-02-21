@@ -28,7 +28,7 @@ export const columns: ColumnDef<ISaleBySeller>[] = [
   },
   {
     accessorKey: 'productId',
-    header: 'Codigo Produto',
+    header: 'Codigo',
   },
   {
     accessorKey: 'valueSold',
@@ -46,6 +46,6 @@ export const columns: ColumnDef<ISaleBySeller>[] = [
   },
   {
     accessorKey: 'soldAmount',
-    header: 'Quantidade',
+    header: 'QTD',
   },
 ]
