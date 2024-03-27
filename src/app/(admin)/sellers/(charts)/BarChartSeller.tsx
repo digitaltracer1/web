@@ -11,6 +11,8 @@ export default function BarChartSeller({ params }: SellerProps) {
 
   const sales = dataSeller?.sales
 
+  if (!sales) return null
+
   // Agrupa e soma os valores e quantidades por produto
   const aggregatedData = sales?.reduce((acc, item) => {
     // Verifica se o item atual já foi adicionado ao acumulador
@@ -32,7 +34,7 @@ export default function BarChartSeller({ params }: SellerProps) {
     soldAmount: item.soldAmount,
   }))
 
-  if (!sales) return null
+  if (!aggregatedDataArray) return null
 
   return <BarChartComponent data={aggregatedDataArray} />
 }
