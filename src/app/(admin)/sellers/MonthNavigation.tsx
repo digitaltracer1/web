@@ -8,7 +8,7 @@ import { ptBR } from 'date-fns/locale'
 import { setCookie } from 'cookies-next'
 
 interface MonthNavigationProps {
-  selectMonth: (month: string | null) => void // Ou ajuste o tipo conforme necessário
+  selectMonth: (month: string) => void // Ou ajuste o tipo conforme necessário
 }
 
 export function MonthNavigation({ selectMonth }: MonthNavigationProps) {

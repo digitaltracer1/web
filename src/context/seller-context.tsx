@@ -59,7 +59,7 @@ interface SellerInfo {
 
 interface SellerContextType {
   info: SellerInfo | undefined
-  addSeller: (info: SellerInfo) => void
+  updateSellers: (date: string) => void
 }
 
 const SellerContext = createContext({} as SellerContextType)
@@ -68,7 +68,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
   const [sellerInfo, setSellerInfo] = useState<SellerInfo>()
 
   // Função para buscar dados do vendedor
-  const fetchSellerInfo = async () => {
+  const fetchSellerInfo = async ({ date }: { date?: string } = {}) => {
     try {
       const [sellers, dataSale] = await Promise.all([
         fetch('https://digitaltracer.ddns.com.br/v1/siac/sellers', {
@@ -79,7 +79,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
           method: 'POST',
           body: JSON.stringify({
             sellerId: '0036',
-            date: new Date(),
+            date: date ? new Date(date) : new Date(),
             filter: 'amount',
           }),
           headers: { 'Content-Type': 'application/json' },
@@ -129,14 +129,12 @@ export function SellerProvider({ children }: SellerProviderProps) {
     }
   }, [])
 
-  function addSeller(info: SellerInfo) {
-    if (sellerInfo !== info) {
-      setSellerInfo(info)
-    }
+  async function updateSellers(date: string) {
+    fetchSellerInfo({ date })
   }
 
   return (
-    <SellerContext.Provider value={{ info: sellerInfo, addSeller }}>
+    <SellerContext.Provider value={{ info: sellerInfo, updateSellers }}>
       {children}
     </SellerContext.Provider>
   )
