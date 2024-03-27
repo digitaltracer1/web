@@ -9,6 +9,7 @@ import ChartSeller from './(charts)/ChartSeller'
 import ReturnChartSeller from './(charts)/ReturnChartSeller'
 import MapSeller from './[id]/map-seller'
 import { SellerProps } from './[id]/page'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function SellerInfo({ params }: SellerProps) {
@@ -43,7 +44,11 @@ export default function SellerInfo({ params }: SellerProps) {
           {/* Mapa venda por area */}
           <div className=" shadow-xl border rounded-lg col-span-2 dark:border-zinc-700 dark:bg-zinc-800 flex justify-center items-center px-4 py-4">
             <div className="w-full h-full rounded-lg overflow-hidden ">
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense
+                fallback={
+                  <Skeleton className="w-full rounded-lg  dark:bg-zinc-800"></Skeleton>
+                }
+              >
                 <MapSeller params={params} />
               </Suspense>
             </div>

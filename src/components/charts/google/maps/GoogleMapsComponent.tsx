@@ -156,6 +156,7 @@ import {
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { darkModeStyles } from './styles/dark-mode'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export interface IDataPoint {
   lat: number
@@ -301,7 +302,7 @@ const GoogleMapsComponent = ({ datapoints }: { datapoints: IDataPoint[] }) => {
   }
 
   if (!isLoaded) {
-    return <div>Loading Maps</div>
+    return <Skeleton className="w-full h-full rounded-lg  dark:bg-zinc-800" />
   }
 
   return (
