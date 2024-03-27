@@ -11,6 +11,10 @@ interface UserListItemProps {
   user: User
 }
 
+function capitalizeFirstLetter(str: string) {
+  return str.replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
 const UserListItem: React.FC<UserListItemProps> = ({ user }) => {
   const { id, name, birthdate } = user
 
@@ -24,7 +28,9 @@ const UserListItem: React.FC<UserListItemProps> = ({ user }) => {
           }}
         />
         <div className="ml-4">
-          <div className="font-medium">{name}</div>
+          <div className="font-medium">
+            {capitalizeFirstLetter(name.toLowerCase())}
+          </div>
           <div className="text-sm text-gray-600">Vendedor</div>
           <div className="text-xs text-gray-500">{birthdate}</div>
         </div>
