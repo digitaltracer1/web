@@ -1,8 +1,8 @@
-'use client'
 import { ApexOptions } from 'apexcharts'
-import Chart from 'react-apexcharts'
 import { useTheme } from 'next-themes'
-import DynamicWrapper from './DynamicWrapper'
+import dynamic from 'next/dynamic'
+
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 export interface ApexDoughnutChartProps {
   data: {
@@ -34,6 +34,18 @@ export function ApexDoughnutChart({ data }: ApexDoughnutChartProps) {
   const backgroundColor = theme === 'light' ? light : dark
 
   const chartOptions: ApexOptions = {
+    yaxis: {
+      floating: true,
+    },
+    chart: {
+      stacked: true,
+    },
+    responsive: [
+      {
+        breakpoint: undefined,
+        options: {},
+      },
+    ],
     stroke: {
       colors: backgroundColor,
     },
@@ -74,11 +86,13 @@ export function ApexDoughnutChart({ data }: ApexDoughnutChartProps) {
   }
 
   return (
-    <DynamicWrapper>
-      <div className="h-full w-full">
-        <Chart options={chartOptions} series={data.series} type="donut" />
-      </div>
-    </DynamicWrapper>
+    <Chart
+      options={chartOptions}
+      series={data.series}
+      type="donut"
+      width="100%"
+      height="100%"
+    />
   )
 }
 

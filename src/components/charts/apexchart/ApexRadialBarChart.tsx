@@ -1,8 +1,10 @@
 'use client'
 import { ApexOptions } from 'apexcharts'
-import Chart from 'react-apexcharts'
 import { useTheme } from 'next-themes'
+import dynamic from 'next/dynamic'
 import { ComponentProps } from 'react'
+
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 export type ApexRadialChartProps = ComponentProps<'div'> & {
   data: {
@@ -15,6 +17,12 @@ export function ApexRadialChart({ data }: ApexRadialChartProps) {
   const { theme } = useTheme()
 
   const chartOptions: ApexOptions = {
+    responsive: [
+      {
+        breakpoint: undefined,
+        options: {},
+      },
+    ],
     labels: data.labels,
     series: data.series,
     colors: ['#1ab7ea', '#0084ff', '#39539E', '#0077B5'],

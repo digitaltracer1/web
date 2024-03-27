@@ -50,7 +50,7 @@ export const Avatar: React.FC<{ user: { name: string; email: string } }> = ({
 
   return (
     <div
-      className="text-white w-10 h-10 flex items-center justify-center font-bold text-2xl rounded-full bg-gray-500"
+      className="text-white w-10 h-10 flex items-center justify-center font-bold text-xl rounded-full bg-gray-500"
       style={{
         backgroundColor: colorByUser({ name, firstName, lastName, email }),
       }}

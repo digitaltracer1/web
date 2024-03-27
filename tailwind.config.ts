@@ -18,11 +18,17 @@ const config = {
       },
     },
     extend: {
+      maxHeight: {
+        appContent: 'calc(100vh - 9rem)',
+      },
+      height: {
+        appContent: 'calc(100vh - 9rem)',
+      },
       margin: {
         '&+': '& + div { margin-top: 8px }',
       },
       gridTemplateColumns: {
-        app: 'minmax(18rem, 20rem) 1fr',
+        app: 'minmax(12rem, 14rem) 1fr',
         profile: 'max-content 1fr max-content',
         form: 'minmax(7.5rem, 17.5rem) minmax(25rem, 1fr) minmax(0, 15rem)',
       },

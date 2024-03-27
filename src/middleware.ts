@@ -1,5 +1,6 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { env } from './env'
 
 export default withAuth(
   function middleware(req) {
@@ -7,10 +8,10 @@ export default withAuth(
 
     const beforeUrl = req.cookies.get('baseUrl')?.value as string
     const pathAfterDomain = beforeUrl
-      ? beforeUrl.split(process.env.NEXTAUTH_URL || '')[1]
+      ? beforeUrl.split(env.NEXTAUTH_URL)[1]
       : undefined
 
-    const currentUrl = req.url.split(process.env.NEXTAUTH_URL || '')[1]
+    const currentUrl = req.url.split(env.NEXTAUTH_URL)[1]
 
     if (pathAfterDomain !== currentUrl && currentUrl !== '/signin') {
       response.cookies.set('baseUrl', currentUrl)

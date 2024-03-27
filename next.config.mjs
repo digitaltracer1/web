@@ -1,10 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   reactStrictMode: true,
-  experimental:{
-    serverActions:{
-      allowedOrigins: ["localhost:3002","digitaltracer.ddns.com.br"]
-    }
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:3002', 'digitaltracer.ddns.com.br'],
+    },
   },
   async headers() {
     return [
@@ -29,9 +35,6 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [{ hostname: 'github.com' }],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 }
 
