@@ -1,19 +1,18 @@
 'use client'
 
 import { useSeller } from '@/context/seller-context'
-import { SellerProps } from './page'
-import { MonthNavigation } from '../MonthNavigation'
-import Link from 'next/link'
 import { ArrowBigLeftDash } from 'lucide-react'
+import Link from 'next/link'
+import { SellerProps } from './page'
 
 function capitalizeFirstLetter(str: string) {
   return str.replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 export default function HeaderSeller({ params }: SellerProps) {
-  const { info, updateSellers } = useSeller()
+  const { info } = useSeller()
 
-  const seller = info?.sellers.find((s) => s.id === params.id)
+  const seller = info?.sellers.find((s) => s.sellerId === params.id)
 
   if (!seller) return null
 
@@ -24,7 +23,7 @@ export default function HeaderSeller({ params }: SellerProps) {
           <ArrowBigLeftDash size={25} />
         </Link>
         <div className="px-4 font-semibold text-base">
-          {capitalizeFirstLetter(seller?.name.toLocaleLowerCase())}
+          {capitalizeFirstLetter(seller?.sellerName.toLocaleLowerCase())}
         </div>
       </div>
       <div className="w-1/2 flex items-center justify-center">

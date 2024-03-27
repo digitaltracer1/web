@@ -49,9 +49,12 @@ export interface DataSellerInfo {
 
 interface SellerInfo {
   sellers: {
-    id: string
-    name: string
+    sellerId: string
+    sellerName: string
     birthdate: string
+    rule: string
+    store: string
+    nickname: string
   }[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dataSale: DataSellerInfo[]
@@ -72,8 +75,8 @@ export function SellerProvider({ children }: SellerProviderProps) {
     try {
       const [sellers, dataSale] = await Promise.all([
         fetch('https://digitaltracer.ddns.com.br/v1/siac/sellers', {
-          cache: 'force-cache',
-          next: { revalidate: 1800 },
+          cache: 'no-cache',
+          // next: { revalidate: 1800 },
         }),
         fetch('https://digitaltracer.ddns.com.br/v1/siac/sale-by-coordinates', {
           method: 'POST',
