@@ -5,14 +5,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useSeller } from '@/context/seller-context'
 
 export default function ListSellers() {
-  const { info } = useSeller()
+  const { sellers, loading } = useSeller()
 
   return (
     <div>
       <h1 className="text-lg  ">Vendedores</h1>
       <div className="py-4 space-y-4 flex flex-col mx-4 ">
-        {info ? (
-          info?.sellers.map((user) => (
+        {loading ? (
+          sellers.map((user) => (
             <UserListItem key={user.sellerId} user={user} />
           ))
         ) : (

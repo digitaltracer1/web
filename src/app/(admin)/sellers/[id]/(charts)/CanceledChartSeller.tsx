@@ -3,26 +3,26 @@
 import RadialBar from '@/components/charts/rechart/radial-bar'
 import { useSeller } from '@/context/seller-context'
 import { BanknoteIcon, Hash } from 'lucide-react'
-import { SellerProps } from '../[id]/page'
+import { SellerProps } from '../page'
 
-export default function ReturnChartSeller({ params }: SellerProps) {
+export default function CancelChartSeller({ params }: SellerProps) {
   const { info } = useSeller()
 
-  const dataSeller = info?.dataSale.find((data) => params.id === data.sellerId)
+  const dataSeller = info.find((data) => params.id === data.sellerId)
 
-  const saleBydevolution = {
+  const saleByCanceled = {
     total: dataSeller?.summary?.soldAmount || 0,
-    value: dataSeller?.summary?.devolutionAmount || 0,
+    value: dataSeller?.summary?.canceledAmount || 0,
   }
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex text-sm w-full justify-center items-center gap-4">
+      <div className="flex pt-1 text-sm w-full justify-center items-center gap-4">
         {/* Container para quantidade */}
         <div className="flex items-center">
-          <Hash size={15} className="text-gray-800 dark:text-gray-500 " />
+          <Hash size={15} className="text-gray-800 dark:text-gray-500" />
           <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold">
-            {saleBydevolution.value}
+            {saleByCanceled.value}
           </p>
         </div>
 
@@ -32,8 +32,8 @@ export default function ReturnChartSeller({ params }: SellerProps) {
             size={15}
             className="text-gray-800 dark:text-gray-500"
           />
-          <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold">
-            {dataSeller?.summary?.valueDevolution.toLocaleString('pt-BR', {
+          <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold ">
+            {dataSeller?.summary?.valueCanceled.toLocaleString('pt-BR', {
               style: 'currency',
               currency: 'BRL',
             })}
@@ -41,7 +41,7 @@ export default function ReturnChartSeller({ params }: SellerProps) {
         </div>
       </div>
       <div className="flex-grow w-full">
-        <RadialBar name="Devoluções" data={saleBydevolution} />
+        <RadialBar name="Cancelados" data={saleByCanceled} />
       </div>
     </div>
   )

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/command'
 import { PopoverContent } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { env } from '@/env'
 import { cn } from '@/lib/utils'
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons'
 import { Popover, PopoverTrigger } from '@radix-ui/react-popover'
@@ -49,7 +50,7 @@ export default function ComboBoxSeller({ selectSeller }: ComboBoxSellerProps) {
 
     async function fetchData() {
       const response = await fetch(
-        'https://digitaltracer.ddns.com.br/v1/siac/sellers',
+        `${env.NEXT_PUBLIC_API_BASE_URL}/v1/siac/sellers`,
       )
       const data = await response.json()
       const sellersData = data.sellers as ISellers[]

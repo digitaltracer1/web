@@ -1,116 +1,186 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react'
-import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts'
+import {
+  RadialBarChart,
+  RadialBar,
+  ResponsiveContainer,
+  Cell,
+  PolarAngleAxis,
+} from 'recharts'
+import { useTheme } from 'next-themes'
+import { useSeller } from '@/context/seller-context'
+import { Skeleton } from '@/components/ui/skeleton'
 
-const data = [
-  { name: 'Group A', value: 400 },
-  { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 300 },
-  { name: 'Group D', value: 200 },
-  { name: 'Group E', value: 200 },
-]
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF8072']
-
-const renderActiveShape = (props: any) => {
-  const RADIAN = Math.PI / 180
-  const {
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    fill,
-    payload,
-    percent,
-    value,
-  } = props
-  const sin = Math.sin(-RADIAN * midAngle)
-  const cos = Math.cos(-RADIAN * midAngle)
-  const sx = cx + (outerRadius + 10) * cos
-  const sy = cy + (outerRadius + 10) * sin
-  const mx = cx + (outerRadius + 30) * cos
-  const my = cy + (outerRadius + 30) * sin
-  const ex = mx + (cos >= 0 ? 1 : -1) * 22
-  const ey = my
-  const textAnchor = cos >= 0 ? 'start' : 'end'
-
-  return (
-    <g>
-      <text
-        x={cx}
-        y={cy}
-        dy={-10}
-        textAnchor="middle"
-        fill={fill}
-        className="text-lg font-bold"
-      >
-        {payload.name}
-      </text>
-      <text
-        x={cx}
-        y={cy}
-        dy={20}
-        textAnchor="middle"
-        fill="#fff"
-        className="text-md"
-      >
-        {`Value: ${value}`}
-      </text>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
-      <Sector
-        cx={cx}
-        cy={cy}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        innerRadius={outerRadius + 6}
-        outerRadius={outerRadius + 10}
-        fill={fill}
-      />
-    </g>
-  )
+interface SimpleRadialBarChartProps {
+  name?: string
+  data: {
+    value: number
+    total: number
+  }
 }
 
-const DoughnutChartComponent: React.FC = () => {
-  const [activeIndex, setActiveIndex] = useState(0)
+const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({ data }) => {
+  const { theme } = useTheme()
+  const { loading } = useSeller()
+  const [hoverData, setHoverData] = useState<{
+    name?: string
+    value?: number
+  } | null>(null)
 
-  const onPieEnter = (_: any, index: number) => {
-    setActiveIndex(index)
+  const exceed = Math.max(0, data.value - data.total)
+  const maxValue = data.total + (exceed > 0 ? exceed : 0)
+
+  const chartData =
+    exceed > 0
+      ? [
+          {
+            name: 'Excedente',
+            value: Math.max(0, data.value - data.total),
+            fill: 'url(#gradientSoldExeed)',
+          },
+          {
+            name: 'Meta',
+            value: data.value,
+            fill: 'url(#gradientSoldProgress)',
+          },
+        ]
+      : [
+          {
+            name: 'Meta',
+            value: data.value,
+            fill: 'url(#gradientSoldProgress)',
+          },
+        ]
+
+  const startAngle = 225
+  const endAngle = -135
+
+  if (!loading) {
+    return (
+      <div className="flex  h-full justify-center items-center flex-grow w-full">
+        <div className="relative">
+          <Skeleton className="h-64 w-64 rounded-full" />
+          <div className="absolute inset-0 m-auto h-56 w-56 bg-white dark:bg-zinc-800 rounded-full"></div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          activeIndex={activeIndex}
-          activeShape={renderActiveShape}
-          data={data}
-          cx="50%"
-          cy="50%"
-          innerRadius="70%"
-          outerRadius="80%"
-          fill="#8884d8"
+      <RadialBarChart
+        innerRadius={exceed > 0 ? '60%' : '80%'}
+        outerRadius="100%"
+        barSize={20}
+        data={chartData}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        cy="50%"
+        cx="50%"
+      >
+        <defs>
+          <filter id="shadowSold" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow
+              dx="0"
+              dy="3"
+              stdDeviation="5"
+              floodColor="#000"
+              floodOpacity="0.6"
+            />
+          </filter>
+          <linearGradient
+            id="gradientSoldProgress"
+            x1="50%"
+            y1="0%"
+            x2="100%"
+            y2="50%"
+          >
+            <stop
+              offset="5%"
+              stopColor={theme === 'dark' ? '#03A9F4' : '#03A9F4'}
+              stopOpacity={0.8}
+            />
+            <stop
+              offset="100%"
+              stopColor={theme === 'dark' ? '#008000 ' : '#008000'}
+              stopOpacity={1}
+            />
+          </linearGradient>
+          <linearGradient
+            id="gradientSoldExeed"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
+            <stop
+              offset="5%"
+              stopColor={theme === 'dark' ? '#FFD700' : '#FFD700'}
+              stopOpacity={0.4}
+            />
+            <stop
+              offset="95%"
+              stopColor={theme === 'dark' ? '#FFAB00 ' : '#FFAB00'}
+              stopOpacity={0.8}
+            />
+          </linearGradient>
+        </defs>
+
+        <PolarAngleAxis type="number" domain={[0, maxValue]} tick={false} />
+        <RadialBar
           dataKey="value"
-          onMouseEnter={onPieEnter}
+          cornerRadius={10}
+          background={{
+            fill: theme === 'dark' ? '#333' : '#dbdbdb',
+            style: { filter: 'url(#shadowSold)' },
+          }}
         >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          {chartData.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              onMouseOver={() =>
+                setHoverData({
+                  name: entry.name,
+                  value: entry.value.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }),
+                })
+              }
+              onMouseOut={() => setHoverData(null)}
+            />
           ))}
-        </Pie>
-      </PieChart>
+        </RadialBar>
+
+        <text
+          x="50%"
+          y="50%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fill={theme === 'dark' ? '#6B7280' : '#1F2937'}
+          style={{ fontSize: '15px' }}
+          dy="-15"
+        >
+          {hoverData ? 'Valor vendido' : `Meta 150K`}
+        </text>
+        <text
+          x="50%"
+          y="50%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fill={theme === 'dark' ? '#6B7280' : '#1F2937'}
+          style={{ fontSize: '20px', fontWeight: 'bold' }}
+          dy="10"
+        >
+          {hoverData
+            ? `${hoverData.value}`
+            : `${data.value.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })}`}
+        </text>
+      </RadialBarChart>
     </ResponsiveContainer>
   )
 }
 
-export default DoughnutChartComponent
+export default RadialBarComponent

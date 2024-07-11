@@ -4,12 +4,12 @@ import GoogleMapsComponent, {
   IDataPoint,
 } from '@/components/charts/google/maps/GoogleMapsComponent'
 import { useSeller } from '@/context/seller-context'
-import { SellerProps } from './page'
+import { SellerProps } from '../page'
 
 export default function MapSeller({ params }: SellerProps) {
   const { info } = useSeller()
 
-  const dataSeller = info?.dataSale.find((data) => params.id === data.sellerId)
+  const dataSeller = info?.find((data) => params.id === data.sellerId)
 
   // const saleByCoordinates: IDataPoint[] = dataSeller?.sales?.map(
   //   (item) => item.clientInfo.geojson,

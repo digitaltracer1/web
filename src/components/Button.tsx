@@ -22,6 +22,11 @@ const button = tv({
         'shadow-none flex items-center gap-3 rounded px-3 py-2 hover:bg-orange-50 ',
         'dark:hover:text-orange-300 dark:hover:bg-zinc-800 dark:text-zinc-100',
       ],
+      toggle: [
+        'w-full font-medium py-1',
+        'flex items-center ',
+        'dark:text-zinc-100',
+      ],
     },
   },
 

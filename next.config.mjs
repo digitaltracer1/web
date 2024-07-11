@@ -9,7 +9,11 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3002', 'digitaltracer.ddns.com.br'],
+      allowedOrigins: [
+        'localhost:3002',
+        'localhost:5000',
+        'digitaltracer.ddns.com.br',
+      ],
     },
   },
   async headers() {

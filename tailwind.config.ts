@@ -109,8 +109,28 @@ const config = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        slideInFromLeft: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        slideInFromRight: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        slideOutToLeft: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+        slideOutToRight: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
+        slideInFromLeft: 'slideInFromLeft 0.5s ease-in-out',
+        slideInFromRight: 'slideInFromRight 0.5s ease-in-out',
+        slideOutToLeft: 'slideOutToLeft 0.5s ease-in-out',
+        slideOutToRight: 'slideOutToRight 0.5s ease-in-out',
         slideDownAndFade:
           'slideDownAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)',
         'accordion-down': 'accordion-down 0.2s ease-out',

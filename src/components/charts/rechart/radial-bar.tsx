@@ -1,4 +1,6 @@
 // components/RadialBarComponent.tsx
+import { Skeleton } from '@/components/ui/skeleton'
+import { useSeller } from '@/context/seller-context'
 import { useTheme } from 'next-themes'
 import React from 'react'
 import {
@@ -21,6 +23,7 @@ const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({
   name,
   data,
 }) => {
+  const { loading } = useSeller()
   const { theme } = useTheme()
 
   const percent =
@@ -34,6 +37,17 @@ const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({
   // Ajusta os ângulos de início e fim para formar um círculo de 270 graus
   const startAngle = 225
   const endAngle = -135
+
+  if (!loading) {
+    return (
+      <div className="flex w-full h-full justify-center items-center flex-grow">
+        <div className="relative">
+          <Skeleton className="h-32 w-32 rounded-full" />
+          <div className="absolute inset-0 m-auto h-24 w-24 bg-white dark:bg-zinc-800 rounded-full"></div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -91,7 +105,7 @@ const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({
           textAnchor="middle"
           dominantBaseline="middle"
           fill={theme === 'dark' ? '#6B7280' : '#1F2937'}
-          style={{ fontSize: '15px' }}
+          style={{ fontSize: '12px', fontWeight: 'bold' }}
           dy="-15"
         >
           {name}
@@ -105,6 +119,7 @@ const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({
           fill={theme === 'dark' ? '#6B7280' : '#1F2937'} // Cor que corresponde à barra preenchida
           style={{ fontSize: '20px', fontWeight: 'bold' }}
           dy="10"
+          dx="7"
         >
           {`${percent.toFixed(2)}%`}
         </text>
