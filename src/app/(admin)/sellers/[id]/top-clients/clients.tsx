@@ -22,14 +22,15 @@ function formatNumber(value: number): string {
 }
 
 export default function Clients({ id }: { id: string }) {
-  const { loading, clients, fetchSalesByClients, findClientById } = useSeller()
+  const { loading, clients, fetchSalesByClients, findClientById, dateRange } =
+    useSeller()
 
   const [sortBy, setSortBy] = useState<'value' | 'count'>('value')
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    fetchSalesByClients(new Date(), new Date(), id)
-  }, [id])
+    fetchSalesByClients(dateRange.dateFrom, dateRange.dateTo, id)
+  }, [dateRange.dateFrom, dateRange.dateTo, id])
 
   const handleToggle = (selected: string) => {
     setSortBy(selected === 'Valor' ? 'value' : 'count')
@@ -45,9 +46,9 @@ export default function Clients({ id }: { id: string }) {
 
   const sortedClients = filteredClients.sort((a, b) => {
     if (sortBy === 'value') {
-      return b.totalValueSold - a.totalValueSold
+      return b.valueBought - a.valueBought
     }
-    return b.orderCount - a.orderCount
+    return b.amountBought - a.amountBought
   })
 
   return (
@@ -113,13 +114,13 @@ export default function Clients({ id }: { id: string }) {
                       <div className="flex items-center">
                         <BanknoteIcon size={15} />
                         <p className="px-2 font-extrabold">
-                          {formatNumber(client.totalValueSold)}
+                          {formatNumber(client.valueBought)}
                         </p>
                       </div>
                       <div className="flex items-center">
                         <Hash size={15} />
                         <p className="px-2 font-extrabold">
-                          {client.orderCount}
+                          {client.amountBought}
                         </p>
                       </div>
                     </div>

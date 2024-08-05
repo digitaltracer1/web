@@ -31,12 +31,12 @@ export default function TopClients({ params }: SellerProps) {
             <div className="h-full w-full flex gap-4 ">
               <div className="flex-grow w-1/2 p-4 flex items-center justify-center rounded-lg dark:border-zinc-700 dark:bg-zinc-800 bg-zinc-50 border shadow-lg dark:shadow-zinc-800">
                 <Suspense fallback={<div>Loading...</div>}>
-                  <InactiveClientsBarChart />
+                  <InactiveClientsBarChart id={params.id} />
                 </Suspense>
               </div>
               <div className="flex-grow w-1/2 flex items-center justify-center rounded-lg dark:border-zinc-700 dark:bg-zinc-800 bg-zinc-50 border shadow-lg dark:shadow-zinc-800">
                 <Suspense fallback={<div>Loading...</div>}>
-                  <NewClientsScatterPlot />
+                  <NewClientsScatterPlot id={params.id} />
                 </Suspense>
               </div>
             </div>

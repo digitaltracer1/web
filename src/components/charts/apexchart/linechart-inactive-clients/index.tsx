@@ -5,16 +5,27 @@ import Chart from 'react-apexcharts'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/Button'
+import { useSeller } from '@/context/seller-context'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import * as ScrollArea from '@radix-ui/react-scroll-area'
 
 interface Client {
-  name: string
-  reason?: string // A razão agora é opcional
-}
-
-interface MockData {
-  period: string
-  clients: Client[]
-  count: number
+  clientId: string
+  clientName: string
+  businessName: string
+  state: string
+  areaCode: string
+  phoneNumber: string
+  createdAt: string
+  lastPurchase: string
 }
 
 interface SeriesData {
@@ -22,66 +33,89 @@ interface SeriesData {
   y: number
 }
 
-export default function InactiveClientsBarChart() {
+export default function InactiveClientsBarChart({ id }: { id: string }) {
   const { theme } = useTheme()
+  const { clientsInactive, fetchClientsInactive } = useSeller()
   const [series, setSeries] = useState<{ name: string; data: SeriesData[] }[]>(
     [],
   )
-  const [selectedData, setSelectedData] = useState<MockData | null>(null)
-
-  // Simulação de dados de clientes inativos por mês
-  const mockData: MockData[] = [
-    {
-      period: 'Jan 2023',
-      clients: [
-        { name: 'Cliente 1', reason: 'Não realizou compras' },
-        { name: 'Cliente 2' }, // Sem razão especificada
-        { name: 'Cliente 3', reason: 'Mudança de região' },
-        { name: 'Cliente 4' }, // Sem razão especificada
-      ],
-      count: 4,
-    },
-    {
-      period: 'Feb 2023',
-      clients: [
-        { name: 'Cliente 5', reason: 'Conta inativa' },
-        { name: 'Cliente 6', reason: 'Não realizou compras' },
-        { name: 'Cliente 6', reason: 'Não realizou compras' },
-        { name: 'Cliente 6', reason: 'Não realizou compras' },
-        { name: 'Cliente 6', reason: 'Não realizou compras' },
-        { name: 'Cliente 6', reason: 'Não realizou compras' },
-        { name: 'Cliente 6', reason: 'Não realizou compras' },
-        { name: 'Cliente 6', reason: 'Não realizou compras' },
-        { name: 'Cliente 7' }, // Sem razão especificada
-      ],
-      count: 9,
-    },
-    {
-      period: 'Mar 2023',
-      clients: [
-        { name: 'Cliente 8', reason: 'Mudança de região' },
-        { name: 'Cliente 9', reason: 'Conta inativa' },
-        { name: 'Cliente 10' }, // Sem razão especificada
-      ],
-      count: 3,
-    },
-    // Adicione mais dados conforme necessário
-  ]
+  const [selectedData, setSelectedData] = useState<{
+    period: string
+    clients: Client[]
+  } | null>(null)
+  const [groupedData, setGroupedData] = useState<
+    Record<string, { period: string; clients: Client[]; count: number }>
+  >({})
 
   useEffect(() => {
-    setSeries([
-      {
-        name: 'Clientes Inativos',
-        data: mockData.map((item) => ({ x: item.period, y: item.count })),
-      },
-    ])
-  }, [])
+    fetchClientsInactive(id)
+  }, [id])
+
+  useEffect(() => {
+    if (clientsInactive.length > 0) {
+      const now = new Date()
+      const startDate = new Date(now.getFullYear(), now.getMonth() - 7, 1)
+
+      const filteredClients = clientsInactive.filter((client) => {
+        const lastPurchaseDate = new Date(client.lastPurchase)
+        return lastPurchaseDate >= startDate
+      })
+
+      const groupedData = filteredClients.reduce(
+        (acc, client) => {
+          if (client.lastPurchase) {
+            const date = new Date(client.lastPurchase)
+            const period = date.toLocaleDateString('pt-BR', {
+              year: 'numeric',
+              month: 'short',
+            })
+            if (!acc[period]) {
+              acc[period] = { period, clients: [], count: 0 }
+            }
+
+            // Verificar se as datas são válidas antes de convertê-las
+            const createdAt = new Date(client.createdAt)
+            const lastPurchase = new Date(client.lastPurchase)
+            const isValidDate = (date: Date) => !isNaN(date.getTime())
+
+            acc[period].clients.push({
+              clientId: client.clientId,
+              clientName: client.clientName,
+              businessName: client.businessName,
+              state: client.state,
+              areaCode: client.areaCode,
+              phoneNumber: client.phoneNumber,
+              createdAt: isValidDate(createdAt)
+                ? createdAt.toISOString()
+                : client.createdAt,
+              lastPurchase: isValidDate(lastPurchase)
+                ? lastPurchase.toISOString()
+                : client.lastPurchase,
+            })
+            acc[period].count += 1
+          }
+          return acc
+        },
+        {} as Record<
+          string,
+          { period: string; clients: Client[]; count: number }
+        >,
+      )
+
+      const data = Object.values(groupedData).map((item) => ({
+        x: item.period,
+        y: item.count,
+      }))
+
+      setGroupedData(groupedData)
+      setSeries([{ name: 'Clientes Inativos', data }])
+    }
+  }, [clientsInactive])
 
   const chartOptions: ApexOptions = {
     theme: {
       mode: theme === 'light' ? 'light' : 'dark',
     },
-
     chart: {
       type: 'bar',
       height: 350,
@@ -89,14 +123,11 @@ export default function InactiveClientsBarChart() {
       events: {
         dataPointSelection: (event, chartContext, config) => {
           const selectedPeriod = series[0].data[config.dataPointIndex].x
-          const selectedClients =
-            mockData.find((item) => item.period === selectedPeriod)?.clients ||
-            []
+          const selectedClients = groupedData[selectedPeriod]?.clients || []
           setSelectedData({
             period: selectedPeriod,
             clients: selectedClients,
-            count: 0,
-          }) // Ajuste necessário para corresponder ao tipo MockData
+          })
         },
       },
     },
@@ -115,11 +146,14 @@ export default function InactiveClientsBarChart() {
       colors: ['transparent'],
     },
     title: {
-      text: 'Relatório de Clientes Inativos por Período',
+      text: 'Relatório de Clientes Inativos',
       align: 'left',
     },
     xaxis: {
       categories: series.length > 0 ? series[0].data.map((item) => item.x) : [],
+      labels: {
+        show: false,
+      },
       title: {
         text: 'Período',
       },
@@ -150,14 +184,48 @@ export default function InactiveClientsBarChart() {
             <h2 className="text-xl font-semibold mb-4">
               Clientes Inativos em {selectedData.period}
             </h2>
-            <ul className="mb-4">
-              {selectedData.clients.map((client, index) => (
-                <li key={index} className="mb-2">
-                  <span className="font-semibold">{client.name}</span>
-                  {client.reason ? `: ${client.reason}` : ''}
-                </li>
-              ))}
-            </ul>
+            <ScrollArea.Root
+              className="w-full h-[38rem] overflow-hidden"
+              type="scroll"
+            >
+              <ScrollArea.Viewport className="w-full h-full rounded overflow-y-scroll">
+                <div className="table-container">
+                  <Table className="w-full">
+                    <TableCaption>
+                      Clientes Inativos em {selectedData.period}
+                    </TableCaption>
+                    <TableHeader className="sticky top-0 bg-white dark:bg-gray-800 z-10">
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>DDD</TableHead>
+                        <TableHead>Telefone</TableHead>
+                        <TableHead>Última Compra</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="text-xs">
+                      {selectedData.clients.map((client, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{client.clientId}</TableCell>
+                          <TableCell>{client.clientName}</TableCell>
+                          <TableCell>{client.areaCode}</TableCell>
+                          <TableCell>{client.phoneNumber}</TableCell>
+                          <TableCell>
+                            {new Date(client.lastPurchase).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </ScrollArea.Viewport>
+              <ScrollArea.Scrollbar
+                className="flex h-0.5 touch-none select-none flex-col bg-zinc-100"
+                orientation="vertical"
+              >
+                <ScrollArea.Thumb className="relative flex-1 rounded-lg bg-zinc-300" />
+              </ScrollArea.Scrollbar>
+            </ScrollArea.Root>
             <Button variant="primary" onClick={() => setSelectedData(null)}>
               Fechar
             </Button>

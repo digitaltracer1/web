@@ -6,13 +6,11 @@ import { BanknoteIcon, Hash } from 'lucide-react'
 import { SellerProps } from '../page'
 
 export default function ReturnChartSeller({ params }: SellerProps) {
-  const { info } = useSeller()
-
-  const dataSeller = info?.find((data) => params.id === data.sellerId)
+  const { summarySeller } = useSeller()
 
   const saleBydevolution = {
-    total: dataSeller?.summary?.soldAmount || 0,
-    value: dataSeller?.summary?.devolutionAmount || 0,
+    total: summarySeller?.soldAmount || 0,
+    value: summarySeller?.devolutionAmount || 0,
   }
 
   return (
@@ -33,7 +31,7 @@ export default function ReturnChartSeller({ params }: SellerProps) {
             className="text-gray-800 dark:text-gray-500"
           />
           <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold">
-            {dataSeller?.summary?.valueDevolution.toLocaleString('pt-BR', {
+            {summarySeller?.valueDevolution.toLocaleString('pt-BR', {
               style: 'currency',
               currency: 'BRL',
             })}

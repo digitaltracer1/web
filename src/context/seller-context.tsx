@@ -7,10 +7,37 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { DataSellerInfo } from './models/sales'
-import { SalesDataClient } from './models/sales-data-clients'
+import { DataSellerInfo, SummaryResult } from './models/sales'
+import { ClientSummary } from './models/sales-data-clients'
 import { SaleByGroup } from './models/sales-data-groups'
 import { Sellers } from './models/sellers'
+
+interface InactiveClientReport {
+  clientId: string
+  clientName: string
+  businessName: string
+  createdAt: Date
+  lastPurchaseDate: Date | null
+  state: string
+  areaCode: string
+  phoneNumber: string
+  lastPurchase: string
+}
+
+export interface Newclients {
+  clientId: string
+  clientName: string
+  businessName: string
+  state: string
+  areaCode: string
+  phoneNumber: string
+  createdAt: Date
+  firstPurchase: Date
+  store: string
+  invoiceNumber: string
+  series: string
+  sellerId: string
+}
 
 interface SellerProviderProps {
   children: ReactNode
@@ -18,15 +45,20 @@ interface SellerProviderProps {
 
 interface SellerContextType {
   info: DataSellerInfo[]
+  summarySeller: SummaryResult | undefined
   loading: boolean
   sellers: Sellers[]
-  clients: SalesDataClient[]
-  client: SalesDataClient | undefined
+  clients: ClientSummary[]
+  newclients: Newclients[]
+  client: ClientSummary | undefined
+  clientsInactive: InactiveClientReport[]
   salesByGroup: SaleByGroup[]
   dateRange: { dateFrom: Date; dateTo: Date }
   fetchSalesByClients: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   fetchSalesByGroup: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   findClientById: (clientId: string) => void
+  fetchClientsInactive: (clientId: string) => void
+  fetchNewClients: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   fetchSalesSeller: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   updateDateRange: (dateFrom: Date, dateTo: Date) => void
 }
@@ -35,18 +67,23 @@ const SellerContext = createContext({} as SellerContextType)
 
 export function SellerProvider({ children }: SellerProviderProps) {
   const [sellerInfo, setSellerInfo] = useState<DataSellerInfo[]>([])
+  const [summary, setSummary] = useState<SummaryResult>()
   const [sellers, setSellers] = useState<Sellers[]>([])
-  const [clients, setClients] = useState<SalesDataClient[]>([])
+  const [clients, setClients] = useState<ClientSummary[]>([])
+  const [client, setClient] = useState<ClientSummary>()
+  const [newclients, setNewclients] = useState<Newclients[]>([])
+  const [clientsInactive, setClientInactive] = useState<InactiveClientReport[]>(
+    [],
+  )
   const [salesByGroup, setSalesByGroup] = useState<SaleByGroup[]>([])
-  const [client, setClient] = useState<SalesDataClient>()
   const [loading, setLoading] = useState<boolean>(true)
   const [dateRange, setDateRange] = useState<{ dateFrom: Date; dateTo: Date }>({
     dateFrom: new Date(),
     dateTo: new Date(),
   })
 
-  const urlBaseApi = 'https://digitaltracer.ddns.com.br'
-  // const urlBaseApi = 'http://localhost:5000'
+  // const urlBaseApi = 'https://digitaltracer.ddns.com.br'
+  const urlBaseApi = 'http://localhost:5000'
 
   const fetchSaleSellerData = async (
     dateFrom: Date,
@@ -54,20 +91,38 @@ export function SellerProvider({ children }: SellerProviderProps) {
     sellerId: string,
   ) => {
     setLoading(false)
-    const result = await fetch(`${urlBaseApi}/v1/siac/sale-by-coordinates`, {
-      method: 'POST',
-      body: JSON.stringify({
-        sellerId,
-        dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
-        dateTo: dateTo ? new Date(dateTo) : new Date(),
-        filter: 'amount',
+
+    const [result, summaryResult] = await Promise.all([
+      fetch(`${urlBaseApi}/v1/siac/sale-by-coordinates`, {
+        method: 'POST',
+        body: JSON.stringify({
+          sellerId,
+          dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
+          dateTo: dateTo ? new Date(dateTo) : new Date(),
+          filter: 'amount',
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'force-cache',
+        next: { revalidate: 1800 },
       }),
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'force-cache',
-      next: { revalidate: 1800 },
-    })
+      fetch(`${urlBaseApi}/v1/siac/sales-summary`, {
+        method: 'POST',
+        body: JSON.stringify({
+          sellerId,
+          dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
+          dateTo: dateTo ? new Date(dateTo) : new Date(),
+          filter: 'amount',
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'force-cache',
+        next: { revalidate: 1800 },
+      }),
+    ])
 
     const dataSellers = await result.json()
+    const summary = await summaryResult.json()
+
+    setSummary(summary)
     setSellerInfo(dataSellers.results)
     setLoading(true)
   }
@@ -91,7 +146,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
   ) => {
     setLoading(false)
 
-    const result = await fetch(`${urlBaseApi}/v1/siac/sale-by-seller-clients`, {
+    const result = await fetch(`${urlBaseApi}/v1/siac/sales-by-clients`, {
       method: 'POST',
       body: JSON.stringify({
         sellerId,
@@ -105,8 +160,9 @@ export function SellerProvider({ children }: SellerProviderProps) {
     })
 
     const dataClients = await result.json()
+    console.log(dataClients)
 
-    setClients(dataClients.salesBySellerIdByClientId[0].clients)
+    setClients(dataClients)
     setLoading(true)
   }
 
@@ -130,6 +186,58 @@ export function SellerProvider({ children }: SellerProviderProps) {
     const dataSales = await result.json()
 
     setSalesByGroup(dataSales.salesBySeller[0].groups)
+    setLoading(true)
+  }
+
+  const fetchNewClients = async (
+    dateFrom: Date,
+    dateTo: Date,
+    sellerId: string,
+  ) => {
+    setLoading(false)
+
+    const result = await fetch(
+      `${urlBaseApi}/v1/siac/new-clients-by-sellerId`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          sellerId,
+          dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
+          dateTo: dateTo ? new Date(dateTo) : new Date(),
+          filter: 'amount',
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'force-cache',
+        next: { revalidate: 1800 },
+      },
+    )
+
+    const dataNewclient = await result.json()
+    console.log(dataNewclient)
+
+    setNewclients(dataNewclient)
+    setLoading(true)
+  }
+
+  const fetchClientsInactive = async () => {
+    setLoading(false)
+
+    const dateFrom = new Date()
+    dateFrom.setMonth(dateFrom.getMonth() - 2)
+
+    const dateTo = new Date()
+    dateTo.setMonth(dateTo.getMonth() + 6)
+
+    const result = await fetch(`${urlBaseApi}/v1/siac/clients-inactive`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'force-cache',
+      next: { revalidate: 1800 },
+    })
+
+    const clientsInactive = await result.json()
+
+    setClientInactive(clientsInactive)
     setLoading(true)
   }
 
@@ -185,23 +293,26 @@ export function SellerProvider({ children }: SellerProviderProps) {
     // Set cookies
     setCookie('dateFrom', dateFrom.toISOString(), { path: '/' })
     setCookie('dateTo', dateTo.toISOString(), { path: '/' })
-
-    console.log(dateRange)
   }
 
   return (
     <SellerContext.Provider
       value={{
         info: sellerInfo,
+        summarySeller: summary,
         fetchSalesSeller,
         fetchSalesByClients,
         fetchSalesByGroup,
+        fetchClientsInactive,
+        fetchNewClients,
         salesByGroup,
         findClientById,
         updateDateRange,
         dateRange,
         clients,
+        newclients,
         client,
+        clientsInactive,
         loading,
         sellers,
       }}

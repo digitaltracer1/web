@@ -1,56 +1,12 @@
 'use client'
 
-import { SalesDetail } from '@/context/models/sales'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useSeller } from '@/context/seller-context'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
 import { BadgeInfo, BanknoteIcon, Hash } from 'lucide-react'
 import Link from 'next/link'
 import { SellerProps } from './page'
-import { ClientInfo } from '@/context/models/client'
-import { Skeleton } from '@/components/ui/skeleton'
-
-interface ClientDetails extends ClientInfo {
-  totalValueSold: number
-  totalSoldAmount: number
-  totalTransactions: number
-}
-
-function getTopClients(salesData: SalesDetail[]) {
-  const clientMap: { [clientId: string]: ClientDetails } = {}
-
-  salesData.forEach((sale) => {
-    const {
-      clientId,
-      clientName,
-      address,
-      postalCode,
-      neighborhood,
-      businessName,
-      geojson,
-    } = sale.clientInfo
-    if (!clientMap[clientId]) {
-      clientMap[clientId] = {
-        clientId,
-        clientName,
-        address,
-        postalCode,
-        neighborhood,
-        businessName,
-        geojson,
-        totalValueSold: 0,
-        totalSoldAmount: 0,
-        totalTransactions: 0,
-      }
-    }
-    clientMap[clientId].totalValueSold += sale.valueSold
-    clientMap[clientId].totalSoldAmount += sale.soldAmount
-    clientMap[clientId].totalTransactions += 1
-  })
-
-  return Object.values(clientMap).sort(
-    (a, b) => b.totalValueSold - a.totalValueSold,
-  )
-}
+import { useEffect } from 'react'
 
 function formatNumber(value: number): string {
   if (value >= 1e6) {
@@ -63,14 +19,15 @@ function formatNumber(value: number): string {
 }
 
 export default function TopClientsList({ params }: SellerProps) {
-  const { info, loading } = useSeller()
+  const { loading, clients, fetchSalesByClients, dateRange } = useSeller()
 
-  const topClientsData =
-    info?.flatMap((sales) => {
-      return sales.sales
-    }) || []
+  useEffect(() => {
+    fetchSalesByClients(dateRange.dateFrom, dateRange.dateTo, params.id)
+  }, [dateRange.dateFrom, dateRange.dateTo, params.id])
 
-  const topClients = getTopClients(topClientsData)
+  const sortedClients = clients.sort((a, b) => {
+    return b.valueBought - a.valueBought
+  })
 
   return (
     <div className="h-full flex flex-col">
@@ -93,12 +50,12 @@ export default function TopClientsList({ params }: SellerProps) {
         </div>
       </div>
       <div className="flex-grow w-full">
-        {loading && topClients.length > 0 ? (
+        {loading && sortedClients.length > 0 ? (
           <div className="px-2 h-full ">
             <ScrollArea.Root className="w-full" type="scroll">
               <ScrollArea.Viewport className="w-full overflow-y-scroll">
                 <ul className="p-2 h-80 space-y-2">
-                  {topClients.map((client, index) => (
+                  {sortedClients.map((client, index) => (
                     <li
                       key={index}
                       className="h-10 px-2 border rounded-md flex items-center shadow-md border-zinc-200 dark:border-zinc-600 dark:bg-zinc-700 justify-between"
@@ -111,7 +68,7 @@ export default function TopClientsList({ params }: SellerProps) {
                         <div className="flex items-center">
                           <Hash size={15} />
                           <p className="px-2 font-extrabold">
-                            {client.totalTransactions}
+                            {client.amountBought}
                           </p>
                         </div>
 
@@ -119,7 +76,7 @@ export default function TopClientsList({ params }: SellerProps) {
                         <div className="flex items-center">
                           <BanknoteIcon size={15} />
                           <p className="px-2 font-extrabold">
-                            {formatNumber(client.totalValueSold)}
+                            {formatNumber(client.valueBought)}
                           </p>
                         </div>
                       </div>

@@ -6,13 +6,11 @@ import { BanknoteIcon, Hash } from 'lucide-react'
 import { SellerProps } from '../page'
 
 export default function CancelChartSeller({ params }: SellerProps) {
-  const { info } = useSeller()
-
-  const dataSeller = info.find((data) => params.id === data.sellerId)
+  const { summarySeller } = useSeller()
 
   const saleByCanceled = {
-    total: dataSeller?.summary?.soldAmount || 0,
-    value: dataSeller?.summary?.canceledAmount || 0,
+    total: summarySeller?.soldAmount || 0,
+    value: summarySeller?.canceledAmount || 0,
   }
 
   return (
@@ -22,7 +20,7 @@ export default function CancelChartSeller({ params }: SellerProps) {
         <div className="flex items-center">
           <Hash size={15} className="text-gray-800 dark:text-gray-500" />
           <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold">
-            {saleByCanceled.value}
+            {summarySeller?.canceledAmount}
           </p>
         </div>
 
@@ -33,7 +31,7 @@ export default function CancelChartSeller({ params }: SellerProps) {
             className="text-gray-800 dark:text-gray-500"
           />
           <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold ">
-            {dataSeller?.summary?.valueCanceled.toLocaleString('pt-BR', {
+            {summarySeller?.valueCanceled.toLocaleString('pt-BR', {
               style: 'currency',
               currency: 'BRL',
             })}

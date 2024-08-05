@@ -1,79 +1,51 @@
 'use client'
 
+import { Newclients, useSeller } from '@/context/seller-context'
 import { ApexOptions } from 'apexcharts'
-import Chart from 'react-apexcharts'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
-
-interface Client {
-  name: string
-  registrationDate: string
-  firstSaleDate: string
-}
+import Chart from 'react-apexcharts'
 
 interface SeriesData {
   x: string // name of the client
   y: number // timestamp for the date
 }
 
-export default function NewClientsCrossPlot() {
+export default function NewClientsCrossPlot({ id }: { id: string }) {
   const { theme } = useTheme()
+  const { newclients, fetchNewClients, dateRange } = useSeller()
   const [series, setSeries] = useState<{ name: string; data: SeriesData[] }[]>(
     [],
   )
 
   useEffect(() => {
-    // Simulação de dados de novos clientes
-    const mockData: Client[] = [
-      {
-        name: 'Cliente 1',
-        registrationDate: '2023-01-01',
-        firstSaleDate: '2023-01-10',
-      },
-      {
-        name: 'Cliente 2',
-        registrationDate: '2023-01-05',
-        firstSaleDate: '2023-01-15',
-      },
-      {
-        name: 'Cliente 3',
-        registrationDate: '2023-01-10',
-        firstSaleDate: '2023-01-20',
-      },
-      {
-        name: 'Cliente 4',
-        registrationDate: '2023-01-15',
-        firstSaleDate: '2023-01-25',
-      },
-      {
-        name: 'Cliente 5',
-        registrationDate: '2023-01-20',
-        firstSaleDate: '2023-01-30',
-      },
-      // Adicione mais dados conforme necessário
-    ]
+    fetchNewClients(dateRange.dateFrom, dateRange.dateTo, id)
+  }, [dateRange.dateFrom, dateRange.dateTo, id])
 
-    const registrationData = mockData.map((client) => ({
-      x: client.name,
-      y: new Date(client.registrationDate).getTime(),
-    }))
+  useEffect(() => {
+    if (newclients && newclients.length > 0) {
+      const registrationData = newclients.map((client: Newclients) => ({
+        x: client.clientName,
+        y: new Date(client.createdAt).getTime(),
+      }))
 
-    const firstSaleData = mockData.map((client) => ({
-      x: client.name,
-      y: new Date(client.firstSaleDate).getTime(),
-    }))
+      const firstSaleData = newclients.map((client: Newclients) => ({
+        x: client.clientName,
+        y: new Date(client.firstPurchase).getTime(),
+      }))
 
-    setSeries([
-      {
-        name: 'Data de Cadastro',
-        data: registrationData,
-      },
-      {
-        name: 'Data da 1ª Venda',
-        data: firstSaleData,
-      },
-    ])
-  }, [])
+      setSeries([
+        {
+          name: 'Data de Cadastro',
+          data: registrationData,
+        },
+        {
+          name: 'Data da 1ª Venda',
+          data: firstSaleData,
+        },
+      ])
+    }
+  }, [newclients])
 
   const chartOptions: ApexOptions = {
     theme: {
@@ -88,6 +60,9 @@ export default function NewClientsCrossPlot() {
       categories: series.length > 0 ? series[0].data.map((item) => item.x) : [],
       title: {
         text: 'Clientes',
+      },
+      labels: {
+        show: false,
       },
     },
     yaxis: [

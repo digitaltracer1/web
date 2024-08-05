@@ -9,15 +9,11 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 
 export default function ChartSeller({ params }: SellerProps) {
-  const { info, fetchSalesSeller, dateRange } = useSeller()
+  const { fetchSalesSeller, dateRange, summarySeller } = useSeller()
 
   useEffect(() => {
     fetchSalesSeller(dateRange.dateFrom, dateRange.dateTo, params.id)
   }, [dateRange.dateFrom, dateRange.dateTo, params.id])
-
-  const dataSeller = info?.find((data) => params.id === data.sellerId)
-
-  const sellerSold = dataSeller?.summary
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -26,7 +22,7 @@ export default function ChartSeller({ params }: SellerProps) {
         <div className="flex items-center">
           <Hash size={15} className="text-gray-800 dark:text-gray-500" />
           <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold">
-            {sellerSold ? sellerSold.soldAmount : 0}
+            {summarySeller ? summarySeller?.soldAmount : 0}
           </p>
         </div>
 
@@ -37,8 +33,8 @@ export default function ChartSeller({ params }: SellerProps) {
             className="text-gray-800 dark:text-gray-500"
           />
           <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold ">
-            {sellerSold
-              ? sellerSold.valueSold.toLocaleString('pt-BR', {
+            {summarySeller
+              ? summarySeller?.valueSold.toLocaleString('pt-BR', {
                   style: 'currency',
                   currency: 'BRL',
                 })
@@ -64,7 +60,7 @@ export default function ChartSeller({ params }: SellerProps) {
           name={'Meta'}
           data={{
             total: 210000,
-            value: sellerSold ? sellerSold.valueSold : 0,
+            value: summarySeller ? summarySeller?.valueSold : 0,
           }}
         />
       </div>

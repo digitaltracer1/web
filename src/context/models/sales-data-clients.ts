@@ -15,21 +15,32 @@ interface Sale {
   totalOrderValue?: number
 }
 
-export interface SalesDataClient {
+export interface OrderSummary {
+  storeId: string
+  orderId: string
+  value: number
+  date: string
+}
+
+export interface ClientSummary {
   clientId: string
   clientName: string
   businessName: string
   address: string
   neighborhood: string
   postalCode: string
-  sales: Sale[]
-  averageTicket: number
-  totalValueSold: number
-  orderCount: number
+
+  valueBought: number
+  amountBought: number
+  valueDevolution: number
+  amountDevolution: number
+  valueCanceled: number
+  amountCanceled: number
+  orders: OrderSummary[]
 }
 
 export interface SalesData {
   sellerId: string
   sellerName: string
-  clients: SalesDataClient[]
+  clients: ClientSummary[]
 }
