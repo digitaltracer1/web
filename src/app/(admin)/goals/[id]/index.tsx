@@ -3,15 +3,16 @@
 import { Button } from '@/components/Button'
 import { Goal, GoalStartValue } from '@/context/models/goals'
 import { useSeller } from '@/context/seller-context'
+import { env } from 'process'
 import { useEffect, useState } from 'react'
-import SalesTargetSection from './sales-target'
 import AverageTicketSection from './average-ticket'
+import BrandTargetSection from './brand-target'
 import CancellationRateSection from './cancellation-rate'
 import InactiveClientsSection from './inactive-clients'
 import NewCustomersTargetSection from './new-customers-target'
-import SpecificClientTargetSection from './specific-client-target'
-import BrandTargetSection from './brand-target'
 import { SellerProps } from './page'
+import SalesTargetSection from './sales-target'
+import SpecificClientTargetSection from './specific-client-target'
 
 export default function GoalsForm({ params }: SellerProps) {
   const { fetchGoalsBySeller, goals, dateRange } = useSeller()
@@ -22,7 +23,7 @@ export default function GoalsForm({ params }: SellerProps) {
     const year = new Date(dateRange.dateFrom).getFullYear()
     const sellerId = params.id
 
-    fetchGoalsBySeller(month, year, sellerId)
+    // fetchGoalsBySeller(month, year, sellerId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange.dateFrom, dateRange.dateTo, params.id])
 
@@ -87,7 +88,7 @@ export default function GoalsForm({ params }: SellerProps) {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/v1/goals/update`, {
+      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/v1/goals/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

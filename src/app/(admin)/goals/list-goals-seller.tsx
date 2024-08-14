@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { env } from 'process'
 
 interface GoalsListProps {
   sellerId: string
@@ -37,7 +38,7 @@ export default function GoalsList({ sellerId }: GoalsListProps) {
     const fetchGoals = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/v1/goals/seller/${sellerId}`,
+          `${env.NEXT_PUBLIC_API_BASE_URL}/v1/goals/seller/${sellerId}`,
         )
 
         if (!response.ok) {
@@ -88,7 +89,7 @@ export default function GoalsList({ sellerId }: GoalsListProps) {
 
   const handleDeleteClick = async (goalId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/v1/goals/${goalId}`, {
+      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/v1/goals/${goalId}`, {
         method: 'DELETE',
       })
 

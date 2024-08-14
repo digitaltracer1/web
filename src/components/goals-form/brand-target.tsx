@@ -5,6 +5,7 @@ import { Button } from '@/components/Button'
 import * as Input from '@/components/Input'
 import { BanknoteIcon, PlusIcon } from 'lucide-react'
 import { BrandTarget, Goal } from '@/context/models/goals'
+import { env } from 'process'
 
 interface BrandTargetSectionProps {
   formState: Goal
@@ -73,7 +74,7 @@ export default function BrandTargetSection({
 
   const fetchBrands = async (filter: string) => {
     try {
-      const response = await fetch('http://localhost:5000/v1/siac/brands', {
+      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/v1/siac/brands`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

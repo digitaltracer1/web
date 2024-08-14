@@ -13,6 +13,7 @@ import InactiveClientsSection from './inactive-clients'
 import NewCustomersTargetSection from './new-customers-target'
 import SalesTargetSection from './sales-target'
 import SpecificClientTargetSection from './specific-client-target'
+import { env } from 'process'
 
 export interface GoalProps {
   params: {
@@ -120,8 +121,8 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
     try {
       const url =
         mode === 'update'
-          ? `http://localhost:5000/v1/goals/update`
-          : `http://localhost:5000/v1/goals/create`
+          ? `${env.NEXT_PUBLIC_API_BASE_URL}/v1/goals/update`
+          : `${env.NEXT_PUBLIC_API_BASE_URL}/v1/goals/create`
 
       const method = mode === 'update' ? 'PUT' : 'POST'
 
