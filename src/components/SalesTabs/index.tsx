@@ -6,7 +6,7 @@ export function SalesTabs() {
   return (
     <TabRoot>
       <TabContent value="tab1">
-        <ListSellers />
+        <ListSellers paramUrl={'sellers'} />
       </TabContent>
       <TabContent value="tab2">
         <div>Under Constructions</div>

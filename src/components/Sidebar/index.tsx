@@ -6,7 +6,6 @@ import {
   Activity,
   BarChart,
   FileWarning,
-  Goal,
   LayoutDashboard,
   LifeBuoy,
   Menu,
@@ -41,7 +40,7 @@ export function Sidebar() {
           <NavItem page="/sellers" title="Vendas" icon={Activity} />
           <NavItem page="/products" title="Produtos" icon={PackageSearch} />
           <NavItem page="/shortage" title="Estoque" icon={FileWarning} />
-          <NavItem page="/goals" title="Metas" icon={Goal} />
+          {/* <NavItem page="/goals" title="Metas" icon={Goal} /> */}
           {/* <NavItem page="/reporting" title="Reporting" icon={Flag} /> */}
           {/* <NavItem page="/users" title="Users" icon={Users} /> */}
         </nav>

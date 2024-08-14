@@ -11,6 +11,7 @@ import { DataSellerInfo, SummaryResult } from './models/sales'
 import { ClientSummary } from './models/sales-data-clients'
 import { SaleByGroup } from './models/sales-data-groups'
 import { Sellers } from './models/sellers'
+import { Goal } from './models/goals'
 
 interface InactiveClientReport {
   clientId: string
@@ -54,6 +55,8 @@ interface SellerContextType {
   clientsInactive: InactiveClientReport[]
   salesByGroup: SaleByGroup[]
   dateRange: { dateFrom: Date; dateTo: Date }
+  goals: Goal | undefined
+  fetchGoalsBySeller: (goalId: string) => void
   fetchSalesByClients: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   fetchSalesByGroup: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   findClientById: (clientId: string) => void
@@ -68,6 +71,7 @@ const SellerContext = createContext({} as SellerContextType)
 export function SellerProvider({ children }: SellerProviderProps) {
   const [sellerInfo, setSellerInfo] = useState<DataSellerInfo[]>([])
   const [summary, setSummary] = useState<SummaryResult>()
+  const [goal, setGoal] = useState<Goal>()
   const [sellers, setSellers] = useState<Sellers[]>([])
   const [clients, setClients] = useState<ClientSummary[]>([])
   const [client, setClient] = useState<ClientSummary>()
@@ -160,7 +164,6 @@ export function SellerProvider({ children }: SellerProviderProps) {
     })
 
     const dataClients = await result.json()
-    console.log(dataClients)
 
     setClients(dataClients)
     setLoading(true)
@@ -241,6 +244,22 @@ export function SellerProvider({ children }: SellerProviderProps) {
     setLoading(true)
   }
 
+  const fetchGoalsBySeller = async (goalId: string) => {
+    setLoading(false)
+
+    const result = await fetch(`${urlBaseApi}/v1/goals/${goalId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'force-cache',
+      next: { revalidate: 1800 },
+    })
+
+    const dataGoal = await result.json()
+    console.log(dataGoal)
+    setGoal(dataGoal)
+    setLoading(true)
+  }
+
   useEffect(() => {
     fetchSellers()
 
@@ -300,6 +319,8 @@ export function SellerProvider({ children }: SellerProviderProps) {
       value={{
         info: sellerInfo,
         summarySeller: summary,
+        goals: goal,
+        fetchGoalsBySeller,
         fetchSalesSeller,
         fetchSalesByClients,
         fetchSalesByGroup,

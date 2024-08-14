@@ -47,9 +47,14 @@ const months = [
   'Dezembro',
 ]
 
+interface MonthPickerProps extends React.HTMLAttributes<HTMLDivElement> {
+  allowRangeSelection?: boolean // Nova propriedade para controlar a seleção de intervalo
+}
+
 export default function MonthPicker({
   className,
-}: React.HTMLAttributes<HTMLDivElement>) {
+  allowRangeSelection = true, // Por padrão, a seleção de intervalo é permitida
+}: MonthPickerProps) {
   const { dateRange, updateDateRange } = useSeller()
   const [selectedYear, setSelectedYear] = useState<number>(
     dateRange.dateFrom
@@ -83,10 +88,18 @@ export default function MonthPicker({
 
   const handleMonthClick = (monthIndex: number) => {
     const newMonth = new Date(selectedYear, monthIndex)
+
+    if (!allowRangeSelection) {
+      // Se a seleção de intervalo não for permitida, selecione apenas um mês
+      setProposedStartMonth(newMonth)
+      setProposedEndMonth(undefined)
+      return
+    }
+
     if (!proposedStartMonth || (proposedStartMonth && proposedEndMonth)) {
       setProposedStartMonth(newMonth)
       setProposedEndMonth(undefined)
-    } else if (proposedStartMonth && !proposedEndMonth) {
+    } else if (allowRangeSelection && proposedStartMonth && !proposedEndMonth) {
       if (isBefore(newMonth, proposedStartMonth)) {
         setProposedStartMonth(newMonth)
         setProposedEndMonth(undefined)
@@ -107,7 +120,7 @@ export default function MonthPicker({
         direction === 'increment' ? prevYear + 1 : prevYear - 1,
       )
       setAnimation('')
-    }, 500) // Duration should match the transition duration
+    }, 500)
   }
 
   const handleConfirmClick = () => {

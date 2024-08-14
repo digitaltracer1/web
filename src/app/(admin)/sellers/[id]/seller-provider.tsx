@@ -12,10 +12,10 @@ export default function SellerProviderData({
   children,
   id,
 }: SellerLayoutProps) {
-  const { fetchSalesSeller } = useSeller()
+  const { fetchSalesSeller, dateRange } = useSeller()
 
   useEffect(() => {
-    fetchSalesSeller(new Date().toString(), id)
+    fetchSalesSeller(dateRange.dateFrom, dateRange.dateTo, id)
   }, [id])
 
   return <div>{children}</div>
