@@ -86,8 +86,8 @@ export function SellerProvider({ children }: SellerProviderProps) {
     dateTo: new Date(),
   })
 
-  // const urlBaseApi = 'https://digitaltracer.ddns.com.br'
-  const urlBaseApi = 'http://localhost:5000'
+  const urlBaseApi = 'https://digitaltracer.ddns.com.br'
+  // const urlBaseApi = 'http://localhost:5000'
 
   const fetchSaleSellerData = async (
     dateFrom: Date,

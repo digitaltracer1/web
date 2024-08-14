@@ -15,6 +15,16 @@ export default function ChartSeller({ params }: SellerProps) {
     fetchSalesSeller(dateRange.dateFrom, dateRange.dateTo, params.id)
   }, [dateRange.dateFrom, dateRange.dateTo, params.id])
 
+  let resultSold = 0
+  let resultAmmount = 0
+
+  if (summarySeller) {
+    const totalDevoCanc = (summarySeller.valueCanceled ?? 0) + (summarySeller.valueDevolution ?? 0)
+    resultSold = (summarySeller.valueSold ?? 0) - totalDevoCanc
+    const totalDevoCancAmmount = (summarySeller.canceledAmount ?? 0) + (summarySeller.devolutionAmount ?? 0)
+    resultAmmount = (summarySeller.soldAmount ?? 0) - totalDevoCancAmmount
+  } 
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex text-sm w-full justify-center items-center gap-4 pt-1 ">
@@ -22,7 +32,7 @@ export default function ChartSeller({ params }: SellerProps) {
         <div className="flex items-center">
           <Hash size={15} className="text-gray-800 dark:text-gray-500" />
           <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold">
-            {summarySeller ? summarySeller?.soldAmount : 0}
+            {resultAmmount}
           </p>
         </div>
 
@@ -34,7 +44,7 @@ export default function ChartSeller({ params }: SellerProps) {
           />
           <p className="px-2 text-gray-800 dark:text-gray-500 font-extrabold ">
             {summarySeller
-              ? summarySeller?.valueSold.toLocaleString('pt-BR', {
+              ? resultSold.toLocaleString('pt-BR', {
                   style: 'currency',
                   currency: 'BRL',
                 })
@@ -60,7 +70,7 @@ export default function ChartSeller({ params }: SellerProps) {
           name={'Meta'}
           data={{
             total: 210000,
-            value: summarySeller ? summarySeller?.valueSold : 0,
+            value: resultSold,
           }}
         />
       </div>
