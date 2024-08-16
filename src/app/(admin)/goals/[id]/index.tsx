@@ -3,7 +3,6 @@
 import { Button } from '@/components/Button'
 import { Goal, GoalStartValue } from '@/context/models/goals'
 import { useSeller } from '@/context/seller-context'
-import { env } from 'process'
 import { useEffect, useState } from 'react'
 import AverageTicketSection from './average-ticket'
 import BrandTargetSection from './brand-target'
@@ -88,13 +87,16 @@ export default function GoalsForm({ params }: SellerProps) {
     }
 
     try {
-      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/v1/goals/update`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/goals/update`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      })
+      )
 
       if (!response.ok) {
         throw new Error('Erro ao atualizar as metas')

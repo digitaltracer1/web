@@ -1,15 +1,6 @@
 'use client'
 
 import { Button } from '@/components/Button'
-import { Goal } from '@/context/models/goals'
-import {
-  ChevronsDownIcon,
-  ChevronsUpIcon,
-  FileSlidersIcon,
-  TrashIcon,
-} from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +12,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { env } from 'process'
+import { Goal } from '@/context/models/goals'
+import {
+  ChevronsDownIcon,
+  ChevronsUpIcon,
+  FileSlidersIcon,
+  TrashIcon,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface GoalsListProps {
   sellerId: string
@@ -38,7 +37,7 @@ export default function GoalsList({ sellerId }: GoalsListProps) {
     const fetchGoals = async () => {
       try {
         const response = await fetch(
-          `${env.NEXT_PUBLIC_API_BASE_URL}/v1/goals/seller/${sellerId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/v1/goals/seller/${sellerId}`,
         )
 
         if (!response.ok) {
@@ -46,7 +45,15 @@ export default function GoalsList({ sellerId }: GoalsListProps) {
         }
 
         const data: Goal[] = await response.json()
-        setGoals(data)
+
+        const sortedGoals = data.sort((a, b) => {
+          if (a.year === b.year) {
+            return b.month - a.month // Mesma ano, ordenar pelo mês inversamente
+          }
+          return b.year - a.year // Diferente ano, ordenar pelo ano inversamente
+        })
+
+        setGoals(sortedGoals)
 
         // Initialize collapsed state after goals are fetched
         const initialCollapsedState: { [key: string]: boolean } = {}
@@ -89,9 +96,12 @@ export default function GoalsList({ sellerId }: GoalsListProps) {
 
   const handleDeleteClick = async (goalId: string) => {
     try {
-      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/v1/goals/${goalId}`, {
-        method: 'DELETE',
-      })
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/goals/${goalId}`,
+        {
+          method: 'DELETE',
+        },
+      )
 
       if (!response.ok) {
         throw new Error('Erro ao deletar a meta')

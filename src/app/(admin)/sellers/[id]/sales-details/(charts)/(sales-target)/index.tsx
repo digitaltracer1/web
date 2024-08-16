@@ -16,7 +16,7 @@ import { useSeller } from '@/context/seller-context'
 const SalesTargetChart = dynamic(() => import('./sales-target-chart'), {
   ssr: false,
 })
-const urlBaseApi = 'https://digitaltracer.ddns.com.br'
+const urlBaseApi = process.env.NEXT_PUBLIC_API_URL
 
 const fetchSalesData = async (
   sellerId: string,

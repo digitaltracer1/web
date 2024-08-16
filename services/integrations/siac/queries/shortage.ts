@@ -1,5 +1,3 @@
-import { env } from '@/env'
-
 const fetchShortage = async ({
   startDate,
   endDate,
@@ -10,7 +8,7 @@ const fetchShortage = async ({
   endDate: string
 }) => {
   try {
-    const baseUrl = `${env.NEXT_PUBLIC_API_BASE_URL}/v1/siac/shortage`
+    const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/v1/siac/shortage`
 
     const response = await fetch(baseUrl, {
       method: 'POST',

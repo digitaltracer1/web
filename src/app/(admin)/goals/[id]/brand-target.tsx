@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Button } from '@/components/Button'
 import * as Input from '@/components/Input'
-import { BanknoteIcon, PlusIcon } from 'lucide-react'
 import { BrandTarget, Goal } from '@/context/models/goals'
-import { env } from 'process'
+import { BanknoteIcon, PlusIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 interface BrandTargetSectionProps {
   formState: Goal
@@ -74,16 +73,19 @@ export default function BrandTargetSection({
 
   const fetchBrands = async (filter: string) => {
     try {
-      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/v1/siac/brands`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/siac/brands`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            typeFilter: 'name',
+            filter,
+          }),
         },
-        body: JSON.stringify({
-          typeFilter: 'name',
-          filter,
-        }),
-      })
+      )
       const data = await response.json()
       setSearchResults(data || [])
     } catch (error) {

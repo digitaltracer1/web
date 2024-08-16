@@ -3,7 +3,6 @@
 import * as Input from '@/components/Input'
 import { Goal } from '@/context/models/goals'
 import { BanknoteIcon } from 'lucide-react'
-import { env } from 'process'
 import { useState } from 'react'
 
 interface SpecificClientTargetSectionProps {
@@ -34,16 +33,19 @@ export default function SpecificClientTargetSection({
 
   const fetchClients = async (filter: string) => {
     try {
-      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/v1/siac/clients`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/siac/clients`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            typeFilter: 'name',
+            filter,
+          }),
         },
-        body: JSON.stringify({
-          typeFilter: 'name',
-          filter,
-        }),
-      })
+      )
       const data = await response.json()
       setClientSearchResults(data || [])
     } catch (error) {

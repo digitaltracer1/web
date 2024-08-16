@@ -1,19 +1,19 @@
-interface Item {
-  productId: string
-  productName: string
-  valueSold: number
-  soldAmount: number
-}
+// interface Item {
+//   productId: string
+//   productName: string
+//   valueSold: number
+//   soldAmount: number
+// }
 
-interface Sale {
-  orderId: string
-  storeId: string
-  storeName: string
-  date: string
-  items: Item[]
-  averageTicket?: number
-  totalOrderValue?: number
-}
+// interface Sale {
+//   orderId: string
+//   storeId: string
+//   storeName: string
+//   date: string
+//   items: Item[]
+//   averageTicket?: number
+//   totalOrderValue?: number
+// }
 
 export interface OrderSummary {
   storeId: string

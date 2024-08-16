@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     // className="dark" style={{ colorScheme: 'dark' }}
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}

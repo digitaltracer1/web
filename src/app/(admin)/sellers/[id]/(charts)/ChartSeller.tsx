@@ -19,11 +19,14 @@ export default function ChartSeller({ params }: SellerProps) {
   let resultAmmount = 0
 
   if (summarySeller) {
-    const totalDevoCanc = (summarySeller.valueCanceled ?? 0) + (summarySeller.valueDevolution ?? 0)
+    const totalDevoCanc =
+      (summarySeller.valueCanceled ?? 0) + (summarySeller.valueDevolution ?? 0)
     resultSold = (summarySeller.valueSold ?? 0) - totalDevoCanc
-    const totalDevoCancAmmount = (summarySeller.canceledAmount ?? 0) + (summarySeller.devolutionAmount ?? 0)
+    const totalDevoCancAmmount =
+      (summarySeller.canceledAmount ?? 0) +
+      (summarySeller.devolutionAmount ?? 0)
     resultAmmount = (summarySeller.soldAmount ?? 0) - totalDevoCancAmmount
-  } 
+  }
 
   return (
     <div className="w-full h-full flex flex-col">

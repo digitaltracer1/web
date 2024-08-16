@@ -12,7 +12,7 @@ import {
 
 export default async function Indicated() {
   const result = await fetch(
-    'https://digitaltracer.ddns.com.br/v1/siac/indicated',
+    `${process.env.NEXT_PUBLIC_API_URL}/v1/siac/indicated`,
   )
 
   const { shortages: indicated } = await result.json()

@@ -22,7 +22,6 @@ export default function HeaderSeller({
 }: HeaderSellerProps) {
   const { sellers, loading } = useSeller()
   const router = useRouter()
-  console.log(params)
 
   const seller = sellers?.find((s) => s.sellerId === params.id)
 

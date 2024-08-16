@@ -1,5 +1,3 @@
-import { env } from '@/env'
-
 interface ProductsProps {
   params: {
     id: string
@@ -14,7 +12,7 @@ export async function generateMetadata({ params }: ProductsProps) {
 
 export default async function Product({ params }: ProductsProps) {
   const response = await fetch(
-    `${env.NEXT_PUBLIC_API_BASE_URL}/v1/products/${params.id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/v1/products/${params.id}`,
     {
       cache: 'no-store',
     },
