@@ -10,12 +10,21 @@ export interface SummaryResult {
   valueDevolution: number
 }
 
+interface OutroTeste {
+  clientInfo: ClientInfo
+}
+
+interface Teste {
+  sales: OutroTeste[]
+}
+
 export interface SalesDetail {
   productId: string
   productName: string
   valueSold: number
   soldAmount: number
   clientInfo: ClientInfo
+  sales: Teste[]
 }
 
 export interface DataSellerInfo {

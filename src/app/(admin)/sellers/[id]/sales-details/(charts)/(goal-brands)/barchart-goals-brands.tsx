@@ -94,7 +94,14 @@ export default function BarChartBrands({ data }: BarChartBrandsProps) {
 
   return (
     <div className="w-full h-full flex flex-col">
-      <Chart options={options} series={series} type="bar" height="100%" />
+      {series[0].data.length > 0 ? (
+        <Chart options={options} series={series} type="bar" height="100%" />
+      ) : (
+        <div className="flex justify-center items-center h-full">
+          Não foi definido meta para este mês
+        </div>
+      )}
+      {/* <Chart options={options} series={series} type="bar" height="100%" /> */}
     </div>
   )
 }

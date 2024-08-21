@@ -1,8 +1,7 @@
-import GoalsForm from '@/components/goals-form/goals-form'
-import { SellerProps } from '../../[id]/page'
 import HeaderSeller from '@/app/(admin)/sellers/[id]/header-seller'
+import GoalsForm, { GoalProps } from '@/components/goals-form/goals-form'
 
-export default function CreateGoal({ params }: SellerProps) {
+export default function CreateGoal({ params }: GoalProps) {
   return (
     <>
       <HeaderSeller params={params} showMonthPicker={false} />

@@ -9,6 +9,7 @@ import {
 import { useTheme } from 'next-themes'
 import { useSeller } from '@/context/seller-context'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatNumber } from '@/app/(admin)/sellers/[id]/table-top-clients'
 
 interface SimpleRadialBarChartProps {
   name?: string
@@ -160,7 +161,9 @@ const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({ data }) => {
           style={{ fontSize: '15px' }}
           dy="-15"
         >
-          {hoverData ? 'Valor vendido' : `Meta 150K`}
+          {hoverData
+            ? 'Valor vendido'
+            : `${data.total === 0 ? 'Meta não definida' : formatNumber(data.total)}`}
         </text>
         <text
           x="50%"

@@ -1,25 +1,48 @@
+'use client'
+
 import dynamic from 'next/dynamic'
 import { BarChartBrandsProps } from './barchart-goals-brands'
+import { useSeller } from '@/context/seller-context'
+import { useEffect } from 'react'
+import { SellerProps } from '../../../page'
+import SkeletonBarChartHorizontal from '@/components/charts/skeletons/barchart-horizontal'
 
 const BarChartBrands = dynamic(() => import('./barchart-goals-brands'), {
   ssr: false,
 })
 
-const mockData: BarChartBrandsProps = {
-  data: [
-    { brandName: 'Ranalle', salesTarget: 12000, salesAchieved: 8000 },
-    { brandName: 'Volda', salesTarget: 13000, salesAchieved: 9500 },
-    { brandName: 'Sintech', salesTarget: 7500, salesAchieved: 7000 },
-    { brandName: 'Japan Parts', salesTarget: 7000, salesAchieved: 6500 },
-    { brandName: 'Corteco', salesTarget: 7000, salesAchieved: 6000 },
-    { brandName: 'Sampel', salesTarget: 8000, salesAchieved: 7500 },
-  ],
-}
+export default function BarchartGoalBrands({ params }: SellerProps) {
+  const { goals, fetchGoalsBySeller, loading, dateRange } = useSeller()
 
-export default function BarchartGoalBrands() {
+  useEffect(() => {
+    const month = new Date(dateRange.dateFrom).getMonth() + 1
+    const year = new Date(dateRange.dateFrom).getFullYear()
+    const sellerId = params.id
+
+    fetchGoalsBySeller(month, year, sellerId)
+  }, [dateRange.dateFrom, params.id])
+
+  if (!loading) {
+    if (goals?.brandTargets && goals.brandTargets.length === 0) {
+      return <SkeletonBarChartHorizontal bar={10} /> // ou qualquer outro indicador de carregamento
+    } else if (!goals?.brandTargets || goals.brandTargets.length === 0) {
+      return <SkeletonBarChartHorizontal bar={10} />
+    }
+  }
+
+  const goalsBrand: BarChartBrandsProps = {
+    data: goals?.brandTargets
+      ? goals.brandTargets.map((goal) => ({
+          brandName: goal.brandName,
+          salesAchieved: goal.achieved, // Assumindo valor fictício para fins de exemplo
+          salesTarget: goal.target,
+        }))
+      : [],
+  }
+
   return (
     <div className="h-full w-full p-1">
-      <BarChartBrands data={mockData.data} />
+      <BarChartBrands data={goalsBrand.data} />
     </div>
   )
 }

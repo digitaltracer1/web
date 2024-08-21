@@ -100,6 +100,8 @@ export default function BrandTargetSection({
     }
   }, [newBrand?.brandName])
 
+  console.log(formState.bonusGoalBrand)
+
   return (
     <div className="pt-5">
       <div className="flex gap-4 justify-between">

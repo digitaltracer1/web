@@ -8,7 +8,7 @@ import { useTheme } from 'next-themes'
 import { useMemo } from 'react'
 import Chart from 'react-apexcharts'
 
-interface SalesData {
+export interface SalesData {
   date: string
   totalValue: number
 }
@@ -81,7 +81,7 @@ const SalesTargetChart = ({ data, period }: SalesChartProps) => {
     xaxis: {
       categories: filteredData.map((item) => item.date),
       labels: {
-        show: true,
+        show: false,
       },
     },
     yaxis: {
@@ -95,18 +95,12 @@ const SalesTargetChart = ({ data, period }: SalesChartProps) => {
       },
     },
     dataLabels: {
-      enabled: true,
+      enabled: false,
       formatter: function (value) {
-        return `R$ ${value
-          .toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
-          .replace('R$', '')}` // Remove o símbolo duplicado
+        return `R$ ${formatAbbreviatedValue(Number(value))}` // Remove o símbolo duplicado
       },
-      offsetY: -20, // Move as labels para cima
+      offsetY: 0,
+      offsetX: 0,
       style: {
         colors: [`${theme === 'dark' ? '#fff' : '#000'}`],
         fontWeight: 'bold',
@@ -116,7 +110,8 @@ const SalesTargetChart = ({ data, period }: SalesChartProps) => {
     plotOptions: {
       bar: {
         dataLabels: {
-          position: 'top', // Posicionar as labels no topo da barra
+          position: 'center', // Posicionar as labels no topo da barra
+          orientation: 'vertical',
         },
       },
     },

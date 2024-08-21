@@ -1,6 +1,5 @@
 'use client'
-// import { ApexDoughnutChart } from '@/components/charts/ApexDoughnutChart'
-// import { ApexRadialChartProps } from '@/components/charts/ApexRadialBarChart'
+
 import DonutChart from '@/components/charts/rechart/sales-goal-chart'
 import { useSeller } from '@/context/seller-context'
 import { SellerProps } from '../page'
@@ -9,10 +8,21 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 
 export default function ChartSeller({ params }: SellerProps) {
-  const { fetchSalesSeller, dateRange, summarySeller } = useSeller()
+  const {
+    fetchSalesSeller,
+    dateRange,
+    summarySeller,
+    goals,
+    fetchGoalsBySeller,
+  } = useSeller()
 
   useEffect(() => {
+    const month = new Date(dateRange.dateFrom).getMonth() + 1
+    const year = new Date(dateRange.dateFrom).getFullYear()
+    const sellerId = params.id
+
     fetchSalesSeller(dateRange.dateFrom, dateRange.dateTo, params.id)
+    fetchGoalsBySeller(month, year, sellerId)
   }, [dateRange.dateFrom, dateRange.dateTo, params.id])
 
   let resultSold = 0
@@ -27,6 +37,9 @@ export default function ChartSeller({ params }: SellerProps) {
       (summarySeller.devolutionAmount ?? 0)
     resultAmmount = (summarySeller.soldAmount ?? 0) - totalDevoCancAmmount
   }
+
+  const totalTarget =
+    (goals?.salesTarget?.target ? goals?.salesTarget?.target : 0) ?? 0
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -72,7 +85,7 @@ export default function ChartSeller({ params }: SellerProps) {
         <DonutChart
           name={'Meta'}
           data={{
-            total: 210000,
+            total: totalTarget,
             value: resultSold,
           }}
         />

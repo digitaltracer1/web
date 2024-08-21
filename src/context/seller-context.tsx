@@ -45,7 +45,7 @@ interface SellerProviderProps {
 }
 
 interface SellerContextType {
-  info: DataSellerInfo[]
+  info: DataSellerInfo | undefined
   summarySeller: SummaryResult | undefined
   loading: boolean
   sellers: Sellers[]
@@ -56,7 +56,8 @@ interface SellerContextType {
   salesByGroup: SaleByGroup[]
   dateRange: { dateFrom: Date; dateTo: Date }
   goals: Goal | undefined
-  fetchGoalsBySeller: (goalId: string) => void
+  fetchGoalsByGoalId: (goalId: string) => void
+  fetchGoalsBySeller: (month: number, year: number, sellerId: string) => void
   fetchSalesByClients: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   fetchSalesByGroup: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   findClientById: (clientId: string) => void
@@ -69,7 +70,7 @@ interface SellerContextType {
 const SellerContext = createContext({} as SellerContextType)
 
 export function SellerProvider({ children }: SellerProviderProps) {
-  const [sellerInfo, setSellerInfo] = useState<DataSellerInfo[]>([])
+  const [sellerInfo, setSellerInfo] = useState<DataSellerInfo>()
   const [summary, setSummary] = useState<SummaryResult>()
   const [goal, setGoal] = useState<Goal>()
   const [sellers, setSellers] = useState<Sellers[]>([])
@@ -126,7 +127,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
     const summary = await summaryResult.json()
 
     setSummary(summary)
-    setSellerInfo(dataSellers.results)
+    setSellerInfo(dataSellers[0])
     setLoading(true)
   }
 
@@ -243,19 +244,99 @@ export function SellerProvider({ children }: SellerProviderProps) {
     setLoading(true)
   }
 
-  const fetchGoalsBySeller = async (goalId: string) => {
+  const fetchGoalsByGoalId = async (goalId: string) => {
     setLoading(false)
 
     const result = await fetch(`${urlBaseApi}/v1/goals/${goalId}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      cache: 'force-cache',
-      next: { revalidate: 1800 },
+      cache: 'no-cache',
     })
 
     const dataGoal = await result.json()
-    console.log(dataGoal)
-    setGoal(dataGoal)
+
+    const payload = {
+      ...dataGoal,
+      salesTarget: dataGoal.salesTarget
+        ? {
+            ...dataGoal.salesTarget,
+            target: dataGoal.salesTarget.target * 100,
+            bonus: dataGoal.salesTarget.bonus * 100,
+          }
+        : undefined,
+      cancellationRate: dataGoal.cancellationRate
+        ? {
+            ...dataGoal.cancellationRate,
+            target: dataGoal.cancellationRate.target,
+            bonus: dataGoal.cancellationRate.bonus * 100,
+          }
+        : undefined,
+      averageTicketTarget: dataGoal.averageTicketTarget
+        ? {
+            ...dataGoal.averageTicketTarget,
+            target: dataGoal.averageTicketTarget.target * 100,
+            bonus: dataGoal.averageTicketTarget.bonus * 100,
+          }
+        : undefined,
+      inactiveClientsTarget: dataGoal.inactiveClientsTarget
+        ? {
+            ...dataGoal.inactiveClientsTarget,
+            quantity: dataGoal.inactiveClientsTarget.quantity,
+            minAmount: dataGoal.inactiveClientsTarget.minAmount * 100,
+            bonus: dataGoal.inactiveClientsTarget.bonus * 100,
+          }
+        : undefined,
+      newCustomersTarget: dataGoal.newCustomersTarget
+        ? {
+            ...dataGoal.newCustomersTarget,
+            quantity: dataGoal.newCustomersTarget.quantity,
+            minAmount: dataGoal.newCustomersTarget.minAmount * 100,
+            bonus: dataGoal.newCustomersTarget.bonus * 100,
+          }
+        : undefined,
+      specificClientTarget: dataGoal.specificClientTarget
+        ? {
+            ...dataGoal.specificClientTarget,
+            amount: dataGoal.specificClientTarget.amount * 100,
+            bonus: dataGoal.specificClientTarget.bonus * 100,
+          }
+        : undefined,
+      brandTargets: dataGoal.brandTargets?.map((brand: { target: number }) => ({
+        ...brand,
+        target: brand.target * 100,
+      })),
+      bonusGoalBrand: dataGoal.bonusGoalBrand * 100,
+    }
+
+    setGoal(payload)
+    setLoading(true)
+  }
+
+  const fetchGoalsBySeller = async (
+    month: number,
+    year: number,
+    sellerId: string,
+  ) => {
+    setLoading(false)
+
+    const result = await fetch(`${urlBaseApi}/v1/goals/find`, {
+      method: 'POST',
+      body: JSON.stringify({
+        sellerId,
+        month,
+        year,
+      }),
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-cache',
+    })
+
+    const dataGoal = await result.json()
+    if (dataGoal.ok === true) {
+      setGoal(dataGoal.goal)
+    } else if (dataGoal.ok === false) {
+      setGoal(undefined)
+    }
+
     setLoading(true)
   }
 
@@ -319,6 +400,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
         info: sellerInfo,
         summarySeller: summary,
         goals: goal,
+        fetchGoalsByGoalId,
         fetchGoalsBySeller,
         fetchSalesSeller,
         fetchSalesByClients,

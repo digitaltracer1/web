@@ -7,11 +7,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useSeller } from '@/context/seller-context'
 import { CalendarIcon } from '@radix-ui/react-icons'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import { SellerProps } from '../../../page'
-import { useSeller } from '@/context/seller-context'
+import { SalesData } from './sales-target-chart'
 
 const SalesTargetChart = dynamic(() => import('./sales-target-chart'), {
   ssr: false,
@@ -43,7 +44,7 @@ const fetchSalesData = async (
 
 export default function ChartSalesTarget({ params }: SellerProps) {
   const { dateRange } = useSeller()
-  const [salesData, setSalesData] = useState([])
+  const [salesData, setSalesData] = useState<SalesData[]>([])
   const [period, setPeriod] = useState('day')
 
   useEffect(() => {
@@ -58,9 +59,17 @@ export default function ChartSalesTarget({ params }: SellerProps) {
     getData()
   }, [dateRange.dateFrom, dateRange.dateTo, params.id])
 
+  const totalSold = salesData
+    .reduce((acc, item) => acc + item.totalValue, 0)
+    .toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    })
+
   return (
     <div className="w-full h-full p-2">
-      <div className="flex justify-end space-x-2 pr-2">
+      <div className="flex justify-between space-x-2 pr-2">
+        <div>{`Total vendido no periodo ${totalSold}`}</div>
         <DropdownMenu>
           <DropdownMenuTrigger>
             <CalendarIcon className="w-6 h-6" />

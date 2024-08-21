@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { SellerProps } from './page'
 import { useEffect } from 'react'
 
-function formatNumber(value: number): string {
+export function formatNumber(value: number): string {
   if (value >= 1e6) {
     return (value / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'
   }

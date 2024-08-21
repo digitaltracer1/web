@@ -1,7 +1,7 @@
 export interface SalesTarget {
   // id: string
   target: number
-  // achieved: number
+  achieved: number
   bonus: number
   // createdAt?: string
   // updatedAt?: string
@@ -21,7 +21,7 @@ export interface CancellationRate {
 export interface AverageTicketTarget {
   // id: string
   target: number
-  // achieved: number
+  achieved: number
   bonus: number
   // createdAt?: string
   // updatedAt?: string
@@ -42,7 +42,7 @@ export interface InactiveClientsTarget {
 export interface NewCustomersTarget {
   // id: string
   quantity: number
-  // achieved: number
+  achieved: number
   minAmount: number
   bonus: number
   // createdAt?: string
@@ -66,7 +66,7 @@ export interface BrandTarget {
   brandId: string
   brandName: string
   target: number
-  // achieved: number
+  achieved: number
   // createdAt?: string
   // updatedAt?: string
   // goalId: string
@@ -108,6 +108,7 @@ export const GoalStartValue: Goal = {
   salesTarget: {
     target: 0,
     bonus: 0,
+    achieved: 0,
   },
   cancellationRate: {
     target: 0,
@@ -117,6 +118,7 @@ export const GoalStartValue: Goal = {
   averageTicketTarget: {
     target: 0,
     bonus: 0,
+    achieved: 0,
   },
   inactiveClientsTarget: {
     quantity: 0,
@@ -128,6 +130,7 @@ export const GoalStartValue: Goal = {
     quantity: 0,
     minAmount: 0,
     bonus: 0,
+    achieved: 0,
   },
   specificClientTarget: {
     clientId: '',

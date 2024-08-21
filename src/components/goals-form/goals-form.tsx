@@ -47,12 +47,12 @@ const years = Array.from({ length: 10 }, (_, i) => {
 })
 
 export default function GoalsForm({ params, mode }: GoalsFormProps) {
-  const { fetchGoalsBySeller, goals } = useSeller()
+  const { fetchGoalsByGoalId, goals } = useSeller()
   const [formState, setFormState] = useState<Goal>(GoalStartValue)
 
   useEffect(() => {
     if (mode === 'update') {
-      fetchGoalsBySeller(params.goalId)
+      fetchGoalsByGoalId(params.goalId)
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }
   }, [params.goalId])
@@ -108,13 +108,55 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
       year: formState.year,
       month: formState.month,
       sellerId: formState.sellerId === '' ? params.id : formState.sellerId,
-      salesTarget: formState.salesTarget,
-      cancellationRate: formState.cancellationRate,
-      averageTicketTarget: formState.averageTicketTarget,
-      inactiveClientsTarget: formState.inactiveClientsTarget,
-      newCustomersTarget: formState.newCustomersTarget,
-      specificClientTarget: formState.specificClientTarget,
-      brandTargets: formState.brandTargets,
+      salesTarget: formState.salesTarget
+        ? {
+            ...formState.salesTarget,
+            target: formState.salesTarget.target / 100,
+            bonus: formState.salesTarget.bonus / 100,
+          }
+        : undefined,
+      cancellationRate: formState.cancellationRate
+        ? {
+            ...formState.cancellationRate,
+            target: formState.cancellationRate.target,
+            bonus: formState.cancellationRate.bonus / 100,
+          }
+        : undefined,
+      averageTicketTarget: formState.averageTicketTarget
+        ? {
+            ...formState.averageTicketTarget,
+            target: formState.averageTicketTarget.target / 100,
+            bonus: formState.averageTicketTarget.bonus / 100,
+          }
+        : undefined,
+      inactiveClientsTarget: formState.inactiveClientsTarget
+        ? {
+            ...formState.inactiveClientsTarget,
+            quantity: formState.inactiveClientsTarget.quantity,
+            minAmount: formState.inactiveClientsTarget.minAmount / 100,
+            bonus: formState.inactiveClientsTarget.bonus / 100,
+          }
+        : undefined,
+      newCustomersTarget: formState.newCustomersTarget
+        ? {
+            ...formState.newCustomersTarget,
+            quantity: formState.newCustomersTarget.quantity,
+            minAmount: formState.newCustomersTarget.minAmount / 100,
+            bonus: formState.newCustomersTarget.bonus / 100,
+          }
+        : undefined,
+      specificClientTarget: formState.specificClientTarget
+        ? {
+            ...formState.specificClientTarget,
+            amount: formState.specificClientTarget.amount / 100,
+            bonus: formState.specificClientTarget.bonus / 100,
+          }
+        : undefined,
+      brandTargets: formState.brandTargets?.map((brand) => ({
+        ...brand,
+        target: brand.target / 100,
+      })),
+      bonusGoalBrand: formState.bonusGoalBrand / 100,
     }
 
     try {
@@ -141,8 +183,10 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
         )
       }
 
-      const result = await response.json()
-      console.log(result)
+      console.log(payload)
+
+      // const result = await response.json()
+      // console.log(result)
       alert(
         `Metas ${mode === 'update' ? 'atualizadas' : 'criadas'} com sucesso!`,
       )
