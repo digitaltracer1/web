@@ -1,162 +1,17 @@
-// import {
-//   GoogleMap,
-//   GoogleMapProps,
-//   HeatmapLayer,
-//   LoadScript,
-//   HeatmapLayerProps,
-//   MarkerF,
-//   MarkerProps,
-//   LoadScriptProps,
-// } from '@react-google-maps/api'
-
-// import { useTheme } from 'next-themes'
-// import React, { useEffect, useState } from 'react'
-// import { Props } from 'react-apexcharts'
-// import { darkModeStyles } from './styles/dark-mode'
-// import { datapoints } from './data/datapoints'
-
-// interface IDataPoint {
-//   lat: number
-//   lng: number
-//   name: string
-// }
-
-// const libraries = ['visualization'] as LoadScriptProps['libraries']
-
-// const containerStyle: GoogleMapProps['mapContainerStyle'] = {
-//   width: '100%',
-//   height: '100%',
-// }
-
-// const alwaysStyles = [
-//   {
-//     featureType: 'poi',
-//     elementType: 'labels',
-//     stylers: [{ visibility: 'off' }],
-//   },
-//   {
-//     featureType: 'transit',
-//     elementType: 'labels.icon',
-//     stylers: [{ visibility: 'off' }],
-//   },
-// ]
-
-// const center = {
-//   lat: -15.799665090411168,
-//   lng: -48.12442563524614,
-// }
-
-// const heatmapOptions: HeatmapLayerProps['options'] = {
-//   radius: 10,
-// }
-
-// const markerOptions: MarkerProps['options'] = {}
-
-// const GoogleMapsComponent: React.FC<Props> = () => {
-//   const [map, setMap] = useState<google.maps.Map>()
-//   const [mapLoaded, setMapLoaded] = useState(false)
-//   const [visibleMarkers, setVisibleMarkers] = useState<IDataPoint[]>([])
-//   const [points, setPoints] = useState<google.maps.LatLng[]>([])
-//   const { theme } = useTheme()
-
-//   const options: GoogleMapProps['options'] = {
-//     disableDefaultUI: true, // Desabilita a UI padrão para um visual mais limpo
-//     fullscreenControl: true,
-//     zoomControl: true, // Opcional: habilita o controle de zoom se necessário
-//     styles:
-//       theme === 'dark' ? [...darkModeStyles, ...alwaysStyles] : alwaysStyles,
-//   }
-
-//   useEffect(() => {
-//     console.log(mapLoaded)
-//     if (!mapLoaded) return
-//     console.log(mapLoaded)
-
-//     const convertedData = datapoints.map(
-//       (point) => new google.maps.LatLng(point.lat, point.lng),
-//     )
-
-//     setPoints(convertedData)
-//   }, [mapLoaded])
-
-//   useEffect(() => {
-//     if (!map) return
-
-//     const onZoomChanged = () => {
-//       const currentZoom = map.getZoom() || 12
-
-//       const visible = currentZoom >= 17 ? datapoints : []
-
-//       setVisibleMarkers(visible)
-//     }
-
-//     google.maps.event.addListener(map, 'zoom_changed', onZoomChanged)
-//     onZoomChanged()
-
-//     return () => google.maps.event.clearListeners(map, 'zoom_changed')
-//   }, [map, points])
-
-//   return (
-//     <LoadScript
-//       googleMapsApiKey="AIzaSyBThGMFC4JPC0q3d33oJk4C9l-47QB3RfE"
-//       libraries={libraries}
-//       onLoad={() => {
-//         console.log('loaded')
-//         return setMapLoaded(true)
-//       }}
-//       onUnmount={() => {
-//         console.log('loaded')
-//       }}
-//     >
-//       <GoogleMap
-//         mapContainerStyle={containerStyle}
-//         center={center}
-//         zoom={12}
-//         options={options}
-//         onLoad={setMap}
-//         onUnmount={() => {
-//           console.log('loaded')
-//         }}
-//       >
-//         {mapLoaded && (
-//           <>
-//             <HeatmapLayer data={points} options={heatmapOptions} />
-//             {visibleMarkers.map((point, index) => (
-//               <MarkerF
-//                 key={index}
-//                 position={{ lat: point.lat, lng: point.lng }}
-//                 label={point.name}
-//                 options={markerOptions}
-//               />
-//             ))}
-//             {/* {polygonData.map((polygon, index) => (
-//               <Polygon
-//                 key={index}
-//                 paths={polygon.paths}
-//                 options={polygon.options}
-//               />
-//             ))} */}
-//           </>
-//         )}
-//       </GoogleMap>
-//     </LoadScript>
-//   )
-// }
-
-// export default GoogleMapsComponent
-
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   GoogleMap,
   GoogleMapProps,
   HeatmapLayer,
+  InfoWindow,
+  LoadScriptProps,
   MarkerF,
   useJsApiLoader,
-  LoadScriptProps,
 } from '@react-google-maps/api'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { darkModeStyles } from './styles/dark-mode'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useSeller } from '@/context/seller-context'
 
 export interface IDataPoint {
   lat: number
@@ -222,18 +77,21 @@ const libraries: LoadScriptProps['libraries'] = ['visualization']
 const GoogleMapsComponent = ({ datapoints }: { datapoints: IDataPoint[] }) => {
   const { theme } = useTheme()
   const [map, setMap] = useState<google.maps.Map>()
+  const { loading } = useSeller()
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: 'AIzaSyBThGMFC4JPC0q3d33oJk4C9l-47QB3RfE',
+    googleMapsApiKey: `${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
     libraries,
   })
 
   const [visibleMarkers, setVisibleMarkers] = useState<IDataPoint[]>([])
   const [points, setPoints] = useState<google.maps.LatLng[]>([])
+  const [selectedMarker, setSelectedMarker] = useState<IDataPoint | null>(null)
+  const [heatmapPoints, setHeatmapPoints] = useState<google.maps.LatLng[]>([])
 
   const options: GoogleMapProps['options'] = {
-    disableDefaultUI: true, // Desabilita a UI padrão para um visual mais limpo
+    disableDefaultUI: true,
     fullscreenControl: true,
-    zoomControl: true, // Opcional: habilita o controle de zoom se necessário
+    zoomControl: true,
     styles:
       theme === 'dark' ? [...darkModeStyles, ...alwaysStyles] : alwaysStyles,
   }
@@ -244,26 +102,39 @@ const GoogleMapsComponent = ({ datapoints }: { datapoints: IDataPoint[] }) => {
     gradient: theme === 'dark' ? darkThemeGradient : lightThemeGradient,
   }
 
-  // Ajuste para criar os objetos LatLng apenas após o script do Google Maps ser carregado
   useEffect(() => {
-    if (isLoaded && datapoints) {
+    if (isLoaded && datapoints && !loading.fetchSaleSellerData) {
       setPoints(
         datapoints.map(
           (point) => new window.google.maps.LatLng(point.lat, point.lng),
         ),
       )
-      setVisibleMarkers(datapoints) // Aqui você pode definir quais marcadores serão visíveis
+      setVisibleMarkers(datapoints)
     }
   }, [datapoints, isLoaded])
 
-  // Listen for zoom changes and adjust visible markers
+  useEffect(() => {
+    if (points.length > 0) {
+      let currentIndex = 0
+      const intervalId = setInterval(() => {
+        if (currentIndex < points.length) {
+          setHeatmapPoints((prev) => [...prev, points[currentIndex]])
+          currentIndex++
+        } else {
+          clearInterval(intervalId)
+        }
+      }, 10) // Adiciona um novo ponto a cada 100ms para um efeito gradual
+
+      return () => clearInterval(intervalId)
+    }
+  }, [points])
+
   useEffect(() => {
     if (!map) return
 
     if (isLoaded && map) {
       const handleZoomChanged = () => {
         const currentZoom = map.getZoom()
-        // Verifique se currentZoom não é undefined antes de comparar
         if (currentZoom !== undefined && currentZoom >= 17) {
           setVisibleMarkers(datapoints)
         } else {
@@ -271,13 +142,9 @@ const GoogleMapsComponent = ({ datapoints }: { datapoints: IDataPoint[] }) => {
         }
       }
 
-      // Adiciona listener de zoom_changed
       map.addListener('zoom_changed', handleZoomChanged)
-
-      // Executa imediatamente para configurar o estado inicial
       handleZoomChanged()
 
-      // Limpa o listener quando o componente é desmontado ou o mapa muda
       return () => {
         google.maps.event.clearListeners(map, 'zoom_changed')
       }
@@ -313,15 +180,30 @@ const GoogleMapsComponent = ({ datapoints }: { datapoints: IDataPoint[] }) => {
       options={options}
       onLoad={setMap}
     >
-      <HeatmapLayer data={points} options={heatmapOptions} />
+      <HeatmapLayer data={heatmapPoints} options={heatmapOptions} />
       {visibleMarkers.map((marker, index) => (
         <MarkerF
           key={index}
           position={{ lat: marker.lat, lng: marker.lng }}
-          icon={markerIcon(theme === 'dark' ? '#457a38' : '#457a38')}
+          icon={markerIcon(theme === 'dark' ? '#ff9000' : '#ff9000')}
           title={`${marker.name}`}
+          onClick={() => setSelectedMarker(marker)}
         />
       ))}
+
+      {selectedMarker && (
+        <InfoWindow
+          position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
+          onCloseClick={() => setSelectedMarker(null)}
+          options={{ disableAutoPan: true }}
+        >
+          <div className="dark:text-black">
+            <h2>{selectedMarker.name}</h2>
+            <p>Lat: {selectedMarker.lat}</p>
+            <p>Lng: {selectedMarker.lng}</p>
+          </div>
+        </InfoWindow>
+      )}
     </GoogleMap>
   )
 }
