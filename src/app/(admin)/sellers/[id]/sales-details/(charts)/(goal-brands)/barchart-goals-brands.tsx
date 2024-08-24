@@ -101,9 +101,17 @@ export default function BarChartBrands({ data }: BarChartBrandsProps) {
         const salesAchieved = series[seriesIndex][dataPointIndex]
         const salesTarget = data[dataPointIndex].salesTarget
 
+        const backgroundColor = theme === 'dark' ? '#0b1212' : '#eceff1'
+        const textColor = theme === 'dark' ? '#ffffff' : '#000000'
+        const borderColor = theme === 'dark' ? '#444444' : '#dddddd'
+        const boxShadow =
+          theme === 'dark'
+            ? '0px 4px 8px rgba(0, 0, 0, 0.5)'
+            : '0px 4px 8px rgba(0, 0, 0, 0.2)'
+
         return `
-          <div style="color: #fff; border-radius: 5px;">
-            <div style="font-weight: bold; background-color: #0b1212; padding: 5px; border-radius: 4px; margin-bottom: 5px; font-size: 12px;">
+          <div style="color: ${textColor}; border: 1px solid ${borderColor}; border-radius: 5px; box-shadow: ${boxShadow};">
+            <div style="font-weight: bold; background-color: ${backgroundColor}; padding: 5px; border-radius: 4px; margin-bottom: 5px; font-size: 12px;">
               ${brandName}
             </div>
             <div style="padding: 5px 20px 15px; border-radius: 4px; font-size: 12px;">
