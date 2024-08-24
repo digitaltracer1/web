@@ -12,33 +12,8 @@ import { ClientSummary } from './models/sales-data-clients'
 import { SaleByGroup } from './models/sales-data-groups'
 import { Sellers } from './models/sellers'
 import { Goal } from './models/goals'
-
-interface InactiveClientReport {
-  clientId: string
-  clientName: string
-  businessName: string
-  createdAt: Date
-  lastPurchaseDate: Date | null
-  state: string
-  areaCode: string
-  phoneNumber: string
-  lastPurchase: string
-}
-
-export interface Newclients {
-  clientId: string
-  clientName: string
-  businessName: string
-  state: string
-  areaCode: string
-  phoneNumber: string
-  createdAt: Date
-  firstPurchase: Date
-  store: string
-  invoiceNumber: string
-  series: string
-  sellerId: string
-}
+import { InactiveClientReport } from './models/inactive-client-report'
+import { Newclients } from './models/new-clients'
 
 interface SellerProviderProps {
   children: ReactNode
@@ -47,7 +22,7 @@ interface SellerProviderProps {
 interface SellerContextType {
   info: DataSellerInfo | undefined
   summarySeller: SummaryResult | undefined
-  loading: boolean
+  loading: { [key: string]: boolean }
   sellers: Sellers[]
   clients: ClientSummary[]
   newclients: Newclients[]
@@ -61,7 +36,7 @@ interface SellerContextType {
   fetchSalesByClients: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   fetchSalesByGroup: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   findClientById: (clientId: string) => void
-  fetchClientsInactive: (clientId: string) => void
+  fetchClientsInactive: () => void
   fetchNewClients: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   fetchSalesSeller: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   updateDateRange: (dateFrom: Date, dateTo: Date) => void
@@ -81,7 +56,9 @@ export function SellerProvider({ children }: SellerProviderProps) {
     [],
   )
   const [salesByGroup, setSalesByGroup] = useState<SaleByGroup[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
+
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({})
+
   const [dateRange, setDateRange] = useState<{ dateFrom: Date; dateTo: Date }>({
     dateFrom: new Date(),
     dateTo: new Date(),
@@ -89,58 +66,66 @@ export function SellerProvider({ children }: SellerProviderProps) {
 
   const urlBaseApi = process.env.NEXT_PUBLIC_API_URL
 
+  const setLoadingState = (key: string, value: boolean) => {
+    setLoading((prevState) => ({ ...prevState, [key]: value }))
+  }
+
   const fetchSaleSellerData = async (
     dateFrom: Date,
     dateTo: Date,
     sellerId: string,
   ) => {
-    setLoading(false)
-
-    const [result, summaryResult] = await Promise.all([
-      fetch(`${urlBaseApi}/v1/siac/sale-by-coordinates`, {
-        method: 'POST',
-        body: JSON.stringify({
-          sellerId,
-          dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
-          dateTo: dateTo ? new Date(dateTo) : new Date(),
-          filter: 'amount',
+    setLoadingState('fetchSaleSellerData', true)
+    try {
+      const [result, summaryResult] = await Promise.all([
+        fetch(`${urlBaseApi}/v1/siac/sale-by-coordinates`, {
+          method: 'POST',
+          body: JSON.stringify({
+            sellerId,
+            dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
+            dateTo: dateTo ? new Date(dateTo) : new Date(),
+            filter: 'amount',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'force-cache',
+          next: { revalidate: 1800 },
         }),
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'force-cache',
-        next: { revalidate: 1800 },
-      }),
-      fetch(`${urlBaseApi}/v1/siac/sales-summary`, {
-        method: 'POST',
-        body: JSON.stringify({
-          sellerId,
-          dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
-          dateTo: dateTo ? new Date(dateTo) : new Date(),
-          filter: 'amount',
+        fetch(`${urlBaseApi}/v1/siac/sales-summary`, {
+          method: 'POST',
+          body: JSON.stringify({
+            sellerId,
+            dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
+            dateTo: dateTo ? new Date(dateTo) : new Date(),
+            filter: 'amount',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'force-cache',
+          next: { revalidate: 1800 },
         }),
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'force-cache',
-        next: { revalidate: 1800 },
-      }),
-    ])
+      ])
 
-    const dataSellers = await result.json()
-    const summary = await summaryResult.json()
+      const dataSellers = await result.json()
+      const summary = await summaryResult.json()
 
-    setSummary(summary)
-    setSellerInfo(dataSellers[0])
-    setLoading(true)
+      setSummary(summary)
+      setSellerInfo(dataSellers[0])
+    } finally {
+      setLoadingState('fetchSaleSellerData', false)
+    }
   }
 
   const fetchSellers = async () => {
-    setLoading(false)
-    const result = await fetch(`${urlBaseApi}/v1/siac/sellers`, {
-      cache: 'no-cache',
-      // next: { revalidate: 1800 },
-    })
+    setLoadingState('fetchSellers', true)
+    try {
+      const result = await fetch(`${urlBaseApi}/v1/siac/sellers`, {
+        cache: 'no-cache',
+      })
 
-    const dataSellers = await result.json()
-    setSellers(dataSellers.sellers)
-    setLoading(true)
+      const dataSellers = await result.json()
+      setSellers(dataSellers.sellers)
+    } finally {
+      setLoadingState('fetchSellers', false)
+    }
   }
 
   const fetchClients = async (
@@ -148,60 +133,9 @@ export function SellerProvider({ children }: SellerProviderProps) {
     dateTo: Date,
     sellerId: string,
   ) => {
-    setLoading(false)
-
-    const result = await fetch(`${urlBaseApi}/v1/siac/sales-by-clients`, {
-      method: 'POST',
-      body: JSON.stringify({
-        sellerId,
-        dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
-        dateTo: dateTo ? new Date(dateTo) : new Date(),
-        filter: 'amount',
-      }),
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'force-cache',
-      next: { revalidate: 1800 },
-    })
-
-    const dataClients = await result.json()
-
-    setClients(dataClients)
-    setLoading(true)
-  }
-
-  const fetchSales = async (dateFrom: Date, dateTo: Date, sellerId: string) => {
-    setSalesByGroup([])
-    setLoading(false)
-
-    const result = await fetch(`${urlBaseApi}/v1/siac/sale-by-seller`, {
-      method: 'POST',
-      body: JSON.stringify({
-        sellerId,
-        dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
-        dateTo: dateTo ? new Date(dateTo) : new Date(),
-        filter: 'amount',
-      }),
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'force-cache',
-      next: { revalidate: 1800 },
-    })
-
-    const dataSales = await result.json()
-
-    setSalesByGroup(dataSales.salesBySeller[0].groups)
-    setLoading(true)
-  }
-
-  const fetchNewClients = async (
-    dateFrom: Date,
-    dateTo: Date,
-    sellerId: string,
-  ) => {
-    setLoading(false)
-
-    const result = await fetch(
-      `${urlBaseApi}/v1/siac/new-clients-by-sellerId`,
-      {
+    setLoadingState('fetchClients', true)
+    try {
+      const result = await fetch(`${urlBaseApi}/v1/siac/sales-by-clients`, {
         method: 'POST',
         body: JSON.stringify({
           sellerId,
@@ -212,104 +146,165 @@ export function SellerProvider({ children }: SellerProviderProps) {
         headers: { 'Content-Type': 'application/json' },
         cache: 'force-cache',
         next: { revalidate: 1800 },
-      },
-    )
+      })
 
-    const dataNewclient = await result.json()
-    console.log(dataNewclient)
+      const dataClients = await result.json()
 
-    setNewclients(dataNewclient)
-    setLoading(true)
+      setClients(dataClients)
+    } finally {
+      setLoadingState('fetchClients', false)
+    }
+  }
+
+  const fetchSales = async (dateFrom: Date, dateTo: Date, sellerId: string) => {
+    setLoadingState('fetchSales', true)
+    try {
+      const result = await fetch(`${urlBaseApi}/v1/siac/sale-by-seller`, {
+        method: 'POST',
+        body: JSON.stringify({
+          sellerId,
+          dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
+          dateTo: dateTo ? new Date(dateTo) : new Date(),
+          filter: 'amount',
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'force-cache',
+        next: { revalidate: 1800 },
+      })
+
+      const dataSales = await result.json()
+
+      setSalesByGroup(dataSales.salesBySeller[0].groups)
+    } finally {
+      setLoadingState('fetchSales', false)
+    }
+  }
+
+  const fetchNewClients = async (
+    dateFrom: Date,
+    dateTo: Date,
+    sellerId: string,
+  ) => {
+    setLoadingState('fetchNewClients', true)
+    try {
+      const result = await fetch(
+        `${urlBaseApi}/v1/siac/new-clients-by-sellerId`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            sellerId,
+            dateFrom: dateFrom ? new Date(dateFrom) : new Date(),
+            dateTo: dateTo ? new Date(dateTo) : new Date(),
+            filter: 'amount',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'force-cache',
+          next: { revalidate: 1800 },
+        },
+      )
+
+      const dataNewclient = await result.json()
+
+      setNewclients(dataNewclient)
+    } finally {
+      setLoadingState('fetchNewClients', false)
+    }
   }
 
   const fetchClientsInactive = async () => {
-    setLoading(false)
+    setLoadingState('fetchClientsInactive', true)
+    try {
+      const dateFrom = new Date()
+      dateFrom.setMonth(dateFrom.getMonth() - 2)
 
-    const dateFrom = new Date()
-    dateFrom.setMonth(dateFrom.getMonth() - 2)
+      const dateTo = new Date()
+      dateTo.setMonth(dateTo.getMonth() + 6)
 
-    const dateTo = new Date()
-    dateTo.setMonth(dateTo.getMonth() + 6)
+      const result = await fetch(`${urlBaseApi}/v1/siac/clients-inactive`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'force-cache',
+        next: { revalidate: 1800 },
+      })
 
-    const result = await fetch(`${urlBaseApi}/v1/siac/clients-inactive`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'force-cache',
-      next: { revalidate: 1800 },
-    })
+      const clientsInactive = await result.json()
 
-    const clientsInactive = await result.json()
-
-    setClientInactive(clientsInactive)
-    setLoading(true)
+      setClientInactive(clientsInactive)
+    } finally {
+      setLoadingState('fetchClientsInactive', false)
+    }
   }
 
   const fetchGoalsByGoalId = async (goalId: string) => {
-    setLoading(false)
+    setLoadingState('fetchGoalsByGoalId', true)
+    try {
+      const result = await fetch(`${urlBaseApi}/v1/goals/${goalId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-cache',
+      })
 
-    const result = await fetch(`${urlBaseApi}/v1/goals/${goalId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-cache',
-    })
+      const dataGoal = await result.json()
 
-    const dataGoal = await result.json()
+      const payload = {
+        ...dataGoal,
+        salesTarget: dataGoal.salesTarget
+          ? {
+              ...dataGoal.salesTarget,
+              target: dataGoal.salesTarget.target * 100,
+              bonus: dataGoal.salesTarget.bonus * 100,
+            }
+          : undefined,
+        cancellationRate: dataGoal.cancellationRate
+          ? {
+              ...dataGoal.cancellationRate,
+              target: dataGoal.cancellationRate.target,
+              bonus: dataGoal.cancellationRate.bonus * 100,
+            }
+          : undefined,
+        averageTicketTarget: dataGoal.averageTicketTarget
+          ? {
+              ...dataGoal.averageTicketTarget,
+              target: dataGoal.averageTicketTarget.target * 100,
+              bonus: dataGoal.averageTicketTarget.bonus * 100,
+            }
+          : undefined,
+        inactiveClientsTarget: dataGoal.inactiveClientsTarget
+          ? {
+              ...dataGoal.inactiveClientsTarget,
+              quantity: dataGoal.inactiveClientsTarget.quantity,
+              minAmount: dataGoal.inactiveClientsTarget.minAmount * 100,
+              bonus: dataGoal.inactiveClientsTarget.bonus * 100,
+            }
+          : undefined,
+        newCustomersTarget: dataGoal.newCustomersTarget
+          ? {
+              ...dataGoal.newCustomersTarget,
+              quantity: dataGoal.newCustomersTarget.quantity,
+              minAmount: dataGoal.newCustomersTarget.minAmount * 100,
+              bonus: dataGoal.newCustomersTarget.bonus * 100,
+            }
+          : undefined,
+        specificClientTarget: dataGoal.specificClientTarget
+          ? {
+              ...dataGoal.specificClientTarget,
+              amount: dataGoal.specificClientTarget.amount * 100,
+              bonus: dataGoal.specificClientTarget.bonus * 100,
+            }
+          : undefined,
+        brandTargets: dataGoal.brandTargets?.map(
+          (brand: { target: number }) => ({
+            ...brand,
+            target: brand.target,
+          }),
+        ),
+        bonusGoalBrand: dataGoal.bonusGoalBrand * 100,
+      }
 
-    const payload = {
-      ...dataGoal,
-      salesTarget: dataGoal.salesTarget
-        ? {
-            ...dataGoal.salesTarget,
-            target: dataGoal.salesTarget.target * 100,
-            bonus: dataGoal.salesTarget.bonus * 100,
-          }
-        : undefined,
-      cancellationRate: dataGoal.cancellationRate
-        ? {
-            ...dataGoal.cancellationRate,
-            target: dataGoal.cancellationRate.target,
-            bonus: dataGoal.cancellationRate.bonus * 100,
-          }
-        : undefined,
-      averageTicketTarget: dataGoal.averageTicketTarget
-        ? {
-            ...dataGoal.averageTicketTarget,
-            target: dataGoal.averageTicketTarget.target * 100,
-            bonus: dataGoal.averageTicketTarget.bonus * 100,
-          }
-        : undefined,
-      inactiveClientsTarget: dataGoal.inactiveClientsTarget
-        ? {
-            ...dataGoal.inactiveClientsTarget,
-            quantity: dataGoal.inactiveClientsTarget.quantity,
-            minAmount: dataGoal.inactiveClientsTarget.minAmount * 100,
-            bonus: dataGoal.inactiveClientsTarget.bonus * 100,
-          }
-        : undefined,
-      newCustomersTarget: dataGoal.newCustomersTarget
-        ? {
-            ...dataGoal.newCustomersTarget,
-            quantity: dataGoal.newCustomersTarget.quantity,
-            minAmount: dataGoal.newCustomersTarget.minAmount * 100,
-            bonus: dataGoal.newCustomersTarget.bonus * 100,
-          }
-        : undefined,
-      specificClientTarget: dataGoal.specificClientTarget
-        ? {
-            ...dataGoal.specificClientTarget,
-            amount: dataGoal.specificClientTarget.amount * 100,
-            bonus: dataGoal.specificClientTarget.bonus * 100,
-          }
-        : undefined,
-      brandTargets: dataGoal.brandTargets?.map((brand: { target: number }) => ({
-        ...brand,
-        target: brand.target * 100,
-      })),
-      bonusGoalBrand: dataGoal.bonusGoalBrand * 100,
+      setGoal(payload)
+    } finally {
+      setLoadingState('fetchGoalsByGoalId', false)
     }
-
-    setGoal(payload)
-    setLoading(true)
   }
 
   const fetchGoalsBySeller = async (
@@ -317,27 +312,28 @@ export function SellerProvider({ children }: SellerProviderProps) {
     year: number,
     sellerId: string,
   ) => {
-    setLoading(false)
+    setLoadingState('fetchGoalsBySeller', true)
+    try {
+      const result = await fetch(`${urlBaseApi}/v1/goals/find`, {
+        method: 'POST',
+        body: JSON.stringify({
+          sellerId,
+          month,
+          year,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-cache',
+      })
 
-    const result = await fetch(`${urlBaseApi}/v1/goals/find`, {
-      method: 'POST',
-      body: JSON.stringify({
-        sellerId,
-        month,
-        year,
-      }),
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-cache',
-    })
-
-    const dataGoal = await result.json()
-    if (dataGoal.ok === true) {
-      setGoal(dataGoal.goal)
-    } else if (dataGoal.ok === false) {
-      setGoal(undefined)
+      const dataGoal = await result.json()
+      if (dataGoal.ok === true) {
+        setGoal(dataGoal.goal)
+      } else if (dataGoal.ok === false) {
+        setGoal(undefined)
+      }
+    } finally {
+      setLoadingState('fetchGoalsBySeller', false)
     }
-
-    setLoading(true)
   }
 
   useEffect(() => {
@@ -346,7 +342,6 @@ export function SellerProvider({ children }: SellerProviderProps) {
     // Retrieve date range from cookies
     const dateFromCookie = getCookie('dateFrom')
     const dateToCookie = getCookie('dateTo')
-    console.log(dateFromCookie, dateToCookie)
     if (dateFromCookie && dateToCookie) {
       setDateRange({
         dateFrom: new Date(dateFromCookie as string),
@@ -380,10 +375,10 @@ export function SellerProvider({ children }: SellerProviderProps) {
   }
 
   function findClientById(clientId: string) {
-    setLoading(false)
+    setLoadingState('findClientById', true)
     const client = clients.find((client) => client.clientId === clientId)
     setClient(client)
-    setLoading(true)
+    setLoadingState('findClientById', false)
   }
 
   function updateDateRange(dateFrom: Date, dateTo: Date) {

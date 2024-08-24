@@ -24,7 +24,7 @@ const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({ data }) => {
   const { loading } = useSeller()
   const [hoverData, setHoverData] = useState<{
     name?: string
-    value?: number
+    value?: string
   } | null>(null)
 
   const exceed = Math.max(0, data.value - data.total)
@@ -55,7 +55,7 @@ const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({ data }) => {
   const startAngle = 225
   const endAngle = -135
 
-  if (!loading) {
+  if (loading.fetchSaleSellerData) {
     return (
       <div className="flex  h-full justify-center items-center flex-grow w-full">
         <div className="relative">

@@ -38,7 +38,7 @@ const RadialBarComponent: React.FC<SimpleRadialBarChartProps> = ({
   const startAngle = 225
   const endAngle = -135
 
-  if (!loading) {
+  if (loading.fetchSaleSellerData) {
     return (
       <div className="flex w-full h-full justify-center items-center flex-grow">
         <div className="relative">

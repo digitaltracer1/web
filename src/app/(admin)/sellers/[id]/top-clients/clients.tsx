@@ -79,7 +79,26 @@ export default function Clients({ id }: { id: string }) {
         type="scroll"
       >
         <ScrollArea.Viewport className="w-full h-full rounded overflow-y-scroll">
-          {loading && sortedClients.length > 0 ? (
+          {loading.fetchClients && sortedClients.length > 0 ? (
+            <div className="py-4 space-y-4 flex flex-col mx-4">
+              {Array.from({ length: 10 }, (_, index) => (
+                <Skeleton
+                  key={index}
+                  className="flex items-center p-4 border-b shadow-sm rounded-lg border dark:border-zinc-700 dark:bg-zinc-800 w-full"
+                >
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="ml-4 space-y-2 flex-grow">
+                    <Skeleton className="h-4 w-[250px]" />
+                    <Skeleton className="h-4 w-[200px]" />
+                  </div>
+                  <div className="ml-auto space-y-2 items-end">
+                    <Skeleton className="h-4 w-[50px]" />
+                    <Skeleton className="h-4 w-[50px]" />
+                  </div>
+                </Skeleton>
+              ))}
+            </div>
+          ) : (
             <div className="flex flex-col">
               {sortedClients.map((client) => (
                 <Button
@@ -126,25 +145,6 @@ export default function Clients({ id }: { id: string }) {
                     </div>
                   </div>
                 </Button>
-              ))}
-            </div>
-          ) : (
-            <div className="py-4 space-y-4 flex flex-col mx-4">
-              {Array.from({ length: 10 }, (_, index) => (
-                <Skeleton
-                  key={index}
-                  className="flex items-center p-4 border-b shadow-sm rounded-lg border dark:border-zinc-700 dark:bg-zinc-800 w-full"
-                >
-                  <Skeleton className="h-12 w-12 rounded-full" />
-                  <div className="ml-4 space-y-2 flex-grow">
-                    <Skeleton className="h-4 w-[250px]" />
-                    <Skeleton className="h-4 w-[200px]" />
-                  </div>
-                  <div className="ml-auto space-y-2 items-end">
-                    <Skeleton className="h-4 w-[50px]" />
-                    <Skeleton className="h-4 w-[50px]" />
-                  </div>
-                </Skeleton>
               ))}
             </div>
           )}

@@ -106,7 +106,7 @@ const BarChartDataSales = ({ dataSales }: { dataSales: SaleByGroup[] }) => {
     },
   ]
 
-  if (!loading || dataSales.length === 0) {
+  if (loading.fetchSales || dataSales.length === 0) {
     return (
       <div className="h-full flex flex-col items-center space-y-4">
         <Skeleton className="h-4 w-2/6" />

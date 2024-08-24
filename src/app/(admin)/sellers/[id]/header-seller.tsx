@@ -29,7 +29,21 @@ export default function HeaderSeller({
 
   return (
     <div className="flex h-12 w-full rounded-sm py-2 pr-4 justify-between bg-white dark:bg-zinc-900">
-      {loading ? (
+      {loading.fetchSellers ? (
+        <>
+          <div className="flex items-center justify-center px-4">
+            <Button variant="ghost" onClick={() => router.back()}>
+              <ArrowBigLeftDash size={25} />
+            </Button>
+            <Skeleton className="h-8 w-52 ml-4" />
+          </div>
+          {showMonthPicker && (
+            <div className="flex items-center">
+              <Skeleton className="h-8 w-48" />
+            </div>
+          )}
+        </>
+      ) : (
         <>
           <div className="flex items-center justify-center pl-4">
             <Button variant="ghost" onClick={() => router.back()}>
@@ -42,20 +56,6 @@ export default function HeaderSeller({
           {showMonthPicker && (
             <div className="flex items-center">
               <MonthPicker allowRangeSelection={false} />
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <div className="flex items-center justify-center px-4">
-            <Button variant="ghost" onClick={() => router.back()}>
-              <ArrowBigLeftDash size={25} />
-            </Button>
-            <Skeleton className="h-8 w-52 ml-4" />
-          </div>
-          {showMonthPicker && (
-            <div className="flex items-center">
-              <Skeleton className="h-8 w-48" />
             </div>
           )}
         </>

@@ -22,7 +22,7 @@ export default function BarchartGoalBrands({ params }: SellerProps) {
     fetchGoalsBySeller(month, year, sellerId)
   }, [dateRange.dateFrom, params.id])
 
-  if (!loading) {
+  if (loading.fetchGoalsBySeller) {
     if (goals?.brandTargets && goals.brandTargets.length === 0) {
       return <SkeletonBarChartHorizontal bar={10} /> // ou qualquer outro indicador de carregamento
     } else if (!goals?.brandTargets || goals.brandTargets.length === 0) {

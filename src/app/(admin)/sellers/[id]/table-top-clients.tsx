@@ -50,7 +50,34 @@ export default function TopClientsList({ params }: SellerProps) {
         </div>
       </div>
       <div className="flex-grow w-full">
-        {loading && sortedClients.length > 0 ? (
+        {loading.fetchClients ? (
+          <div className="px-2 h-full ">
+            <ScrollArea.Root className="w-full" type="scroll">
+              <ScrollArea.Viewport className="w-full overflow-y-scroll">
+                <ul className="p-2 h-80 space-y-2">
+                  {[...Array(10)].map((_, index) => (
+                    <li
+                      key={index}
+                      className="h-10 px-2 border rounded-md flex items-center shadow-md border-zinc-200 dark:border-zinc-600 dark:bg-zinc-700 justify-between"
+                    >
+                      <Skeleton className="h-4 w-36" />
+                      <div className="flex text-xs justify-end items-center gap-2">
+                        <Skeleton className="h-4 w-10" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </ScrollArea.Viewport>
+              <ScrollArea.Scrollbar
+                className="flex h-0.5 touch-none select-none flex-col bg-zinc-100"
+                orientation="vertical"
+              >
+                <ScrollArea.Thumb className="relative flex-1 rounded-lg bg-zinc-300" />
+              </ScrollArea.Scrollbar>
+            </ScrollArea.Root>
+          </div>
+        ) : (
           <div className="px-2 h-full ">
             <ScrollArea.Root className="w-full" type="scroll">
               <ScrollArea.Viewport className="w-full overflow-y-scroll">
@@ -79,33 +106,6 @@ export default function TopClientsList({ params }: SellerProps) {
                             {formatNumber(client.valueBought)}
                           </p>
                         </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </ScrollArea.Viewport>
-              <ScrollArea.Scrollbar
-                className="flex h-0.5 touch-none select-none flex-col bg-zinc-100"
-                orientation="vertical"
-              >
-                <ScrollArea.Thumb className="relative flex-1 rounded-lg bg-zinc-300" />
-              </ScrollArea.Scrollbar>
-            </ScrollArea.Root>
-          </div>
-        ) : (
-          <div className="px-2 h-full ">
-            <ScrollArea.Root className="w-full" type="scroll">
-              <ScrollArea.Viewport className="w-full overflow-y-scroll">
-                <ul className="p-2 h-80 space-y-2">
-                  {[...Array(10)].map((_, index) => (
-                    <li
-                      key={index}
-                      className="h-10 px-2 border rounded-md flex items-center shadow-md border-zinc-200 dark:border-zinc-600 dark:bg-zinc-700 justify-between"
-                    >
-                      <Skeleton className="h-4 w-36" />
-                      <div className="flex text-xs justify-end items-center gap-2">
-                        <Skeleton className="h-4 w-10" />
-                        <Skeleton className="h-4 w-16" />
                       </div>
                     </li>
                   ))}
