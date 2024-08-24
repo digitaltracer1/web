@@ -1,6 +1,7 @@
 'use client'
 
-import { Newclients, useSeller } from '@/context/seller-context'
+import { Newclients } from '@/context/models/new-clients'
+import { useSeller } from '@/context/seller-context'
 import { ApexOptions } from 'apexcharts'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'

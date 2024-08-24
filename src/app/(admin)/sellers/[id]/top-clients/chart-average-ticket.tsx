@@ -16,7 +16,7 @@ export function AverageTicketChart() {
   const { client } = useSeller()
 
   if (!client) {
-    return <div>No data available</div>
+    return <div>Selecione um cliente</div>
   }
 
   return (

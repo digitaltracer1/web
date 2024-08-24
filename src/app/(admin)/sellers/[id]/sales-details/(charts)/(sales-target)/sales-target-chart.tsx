@@ -33,8 +33,14 @@ const SalesTargetChart = ({ data, period }: SalesChartProps) => {
       if (period === 'day') {
         key = date.toISOString().split('T')[0]
       } else if (period === 'week') {
-        const week = `${date.getFullYear()}-W${Math.ceil(date.getDate() / 7)}`
-        key = week
+        const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
+        const pastDaysOfMonth = Math.floor(
+          (date.getTime() - startOfMonth.getTime()) / 86400000,
+        )
+        const weekNumber = Math.ceil(
+          (pastDaysOfMonth + startOfMonth.getDay() + 1) / 7,
+        )
+        key = `W${weekNumber}`
       } else if (period === 'month') {
         key = `${date.getFullYear()}-${(date.getMonth() + 1)
           .toString()
@@ -49,10 +55,20 @@ const SalesTargetChart = ({ data, period }: SalesChartProps) => {
       groupedData[key] += item.totalValue
     })
 
-    return Object.entries(groupedData).map(([date, totalValue]) => ({
-      date,
-      totalValue,
-    }))
+    return Object.entries(groupedData)
+      .map(([date, totalValue]) => ({
+        date,
+        totalValue,
+      }))
+      .sort((a, b) => {
+        if (period === 'week') {
+          // Extrair o número da semana e ordenar numericamente
+          const weekA = parseInt(a.date.replace('W', ''), 10)
+          const weekB = parseInt(b.date.replace('W', ''), 10)
+          return weekA - weekB
+        }
+        return new Date(a.date).getTime() - new Date(b.date).getTime()
+      })
   }
 
   const filteredData = useMemo(
@@ -80,8 +96,25 @@ const SalesTargetChart = ({ data, period }: SalesChartProps) => {
     },
     xaxis: {
       categories: filteredData.map((item) => item.date),
+      floating: false,
       labels: {
-        show: false,
+        show: true,
+        formatter: function (value) {
+          if (period === 'day') {
+            const date = new Date(value)
+
+            // Obter o dia, mês e ano abreviado
+            const day = date.getDate().toString().padStart(2, '0') // "23"
+            const month = (date.getMonth() + 1).toString().padStart(2, '0') // "08"
+            const year = date.getFullYear().toString().slice(-2) // "24"
+
+            // Formatar a data com o ano abreviado
+            const formattedDate = `${day}/${month}/${year}`
+            // Exibir apenas o número do dia
+            return formattedDate
+          }
+          return value
+        },
       },
     },
     yaxis: {
@@ -96,6 +129,7 @@ const SalesTargetChart = ({ data, period }: SalesChartProps) => {
     },
     dataLabels: {
       enabled: false,
+      distributed: true,
       formatter: function (value) {
         return `R$ ${formatAbbreviatedValue(Number(value))}` // Remove o símbolo duplicado
       },

@@ -25,9 +25,13 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, paramUrl }) => {
   const { sellerId, sellerName, birthdate, rule } = user
 
   return (
-    <Link href={`/${paramUrl}/${sellerId}`} passHref>
-      <div className="flex items-center justify-between p-4 border-b cursor-pointer dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-orange-300 dark:hover:ring-orange-500/20 hover:border-orange-300 hover:ring-4 hover:ring-orange-100 border border-zinc-300 shadow-sm rounded-lg">
-        <div className="flex items-center">
+    <div className="flex items-center justify-between p-4 border-b dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-orange-300 dark:hover:ring-orange-500/20 hover:border-orange-300 hover:ring-4 hover:ring-orange-100 border border-zinc-300 shadow-sm rounded-lg">
+      <div className="w-full">
+        <Link
+          href={`/${paramUrl}/${sellerId}`}
+          passHref
+          className="flex items-center"
+        >
           <Avatar
             user={{
               name: sellerName,
@@ -43,14 +47,16 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, paramUrl }) => {
               {birthdate || <>&nbsp;</>}
             </div>
           </div>
-        </div>
+        </Link>
+      </div>
+      <div>
         <Link href={`/goals/${sellerId}`} passHref>
           <Button variant="ghost" className="ml-4">
             <GoalIcon className="hover:text-orange-600" />
           </Button>
         </Link>
       </div>
-    </Link>
+    </div>
   )
 }
 

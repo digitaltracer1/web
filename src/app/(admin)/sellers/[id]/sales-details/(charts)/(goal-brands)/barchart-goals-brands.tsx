@@ -37,6 +37,19 @@ export default function BarChartBrands({ data }: BarChartBrandsProps) {
     },
   ]
 
+  const createAcronym = (brandName: string) => {
+    const words = brandName.split(' ')
+    if (words.length === 1) {
+      return words[0].substring(0, 3).toUpperCase()
+    } else {
+      return words
+        .slice(0, 3)
+        .map((word) => word[0])
+        .join('')
+        .toUpperCase()
+    }
+  }
+
   const options: ApexOptions = {
     theme: {
       mode: theme === 'light' ? 'light' : 'dark',
@@ -62,6 +75,12 @@ export default function BarChartBrands({ data }: BarChartBrandsProps) {
     },
     xaxis: {
       categories: data.map((item) => item.brandName),
+      labels: {
+        show: true,
+        formatter: function (value) {
+          return createAcronym(value)
+        },
+      },
     },
     yaxis: {
       title: {
@@ -77,9 +96,34 @@ export default function BarChartBrands({ data }: BarChartBrandsProps) {
       opacity: 1,
     },
     tooltip: {
-      y: {
-        formatter: (val: number) =>
-          `R$ ${val.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`, // Formata como moeda
+      custom: function ({ series, seriesIndex, dataPointIndex }) {
+        const brandName = data[dataPointIndex].brandName
+        const salesAchieved = series[seriesIndex][dataPointIndex]
+        const salesTarget = data[dataPointIndex].salesTarget
+
+        return `
+          <div style="color: #fff; border-radius: 5px;">
+            <div style="font-weight: bold; background-color: #0b1212; padding: 5px; border-radius: 4px; margin-bottom: 5px; font-size: 12px;">
+              ${brandName}
+            </div>
+            <div style="padding: 5px 20px 15px; border-radius: 4px; font-size: 12px;">
+              <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                <span style="background-color: #36a2eb; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px;"></span>
+                <span>Atual: </span>
+                <span style="font-weight: bold; margin-left: 5px;">
+                  R$ ${salesAchieved.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                </span>
+              </div>
+              <div style="display: flex; align-items: center;">
+                <span style="background-color: #ff9000; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px;"></span>
+                <span>Meta: </span>
+                <span style="font-weight: bold; margin-left: 5px;">
+                  R$ ${salesTarget.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                </span>
+              </div>
+            </div>
+          </div>
+        `
       },
     },
     legend: {
@@ -101,7 +145,6 @@ export default function BarChartBrands({ data }: BarChartBrandsProps) {
           Não foi definido meta para este mês
         </div>
       )}
-      {/* <Chart options={options} series={series} type="bar" height="100%" /> */}
     </div>
   )
 }

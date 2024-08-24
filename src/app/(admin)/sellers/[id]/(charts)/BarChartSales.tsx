@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic'
 import { useEffect } from 'react'
 import { SellerProps } from '../page'
 
-// Substitua 'SeuComponenteDeGrafico' pelo nome do seu componente de gráfico
 const BarChartDataSales = dynamic(
   () => import('@/components/charts/apexchart/barchartsales/groups'),
   { ssr: false },

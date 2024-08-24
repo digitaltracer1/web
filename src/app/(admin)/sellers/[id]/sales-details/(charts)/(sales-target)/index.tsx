@@ -82,16 +82,10 @@ export default function ChartSalesTarget({ params }: SellerProps) {
             <DropdownMenuItem onClick={() => setPeriod('week')}>
               Semana
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPeriod('month')}>
-              Mês
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPeriod('year')}>
-              Ano
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="h-5/6">
+      <div className="h-full">
         <SalesTargetChart data={salesData} period={period} />
       </div>
     </div>
