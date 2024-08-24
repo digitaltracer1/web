@@ -20,20 +20,20 @@ export default function NewCustomersTargetSection({
 }: NewCustomersTargetSectionProps) {
   return (
     <div className="flex flex-col gap-3 pt-5 lg:grid lg:grid-cols-form">
-      <label
-        htmlFor="newCustomersTarget"
+      <span
+        // htmlFor="newCustomersTarget"
         className="text-sm font-medium text-zinc-700 dark:text-zinc-300 justify-center content-center"
       >
         Vender para Clientes Novos
-      </label>
+      </span>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div>
-          <label
-            htmlFor="salesTarget"
+          <span
+            // htmlFor="salesTarget"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Quantidade de Clientes
-          </label>
+          </span>
           <Input.Root>
             <Input.Control
               id="newCustomersTarget.quantinty"
@@ -51,12 +51,12 @@ export default function NewCustomersTargetSection({
           </Input.Root>
         </div>
         <div>
-          <label
-            htmlFor="salesTarget"
+          <span
+            // htmlFor="salesTarget"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Valor Mínimo (R$)
-          </label>
+          </span>
           <Input.Root>
             <Input.Prefix>
               <BanknoteIcon className="w-4 h-4" />
@@ -77,12 +77,12 @@ export default function NewCustomersTargetSection({
           </Input.Root>
         </div>
         <div>
-          <label
-            htmlFor="salesTarget"
+          <span
+            // htmlFor="salesTarget"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Bônus (R$)
-          </label>
+          </span>
           <Input.Root>
             <Input.Prefix>
               <BanknoteIcon className="w-4 h-4" />

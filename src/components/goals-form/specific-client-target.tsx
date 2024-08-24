@@ -70,21 +70,21 @@ export default function SpecificClientTargetSection({
 
   return (
     <div className="flex flex-col gap-3 pt-5 lg:grid lg:grid-cols-form">
-      <label
-        htmlFor="specificCustomer"
+      <span
+        // htmlFor="specificCustomer"
         className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
       >
         Escolher 1 Cliente para Vender
-      </label>
+      </span>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div>
-          <label
-            htmlFor="salesTarget"
+          <span
+            // htmlFor="salesTarget"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Selecione um cliente
-          </label>
+          </span>
           <Input.Root>
             <Input.Control
               id="specificClientTarget.clientName"
@@ -107,12 +107,12 @@ export default function SpecificClientTargetSection({
           </Input.Root>
         </div>
         <div>
-          <label
-            htmlFor="salesTarget"
+          <span
+            // htmlFor="salesTarget"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Valor a ser vendido (R$)
-          </label>
+          </span>
           <Input.Root>
             <Input.Prefix>
               <BanknoteIcon className="w-4 h-4" />
@@ -133,12 +133,12 @@ export default function SpecificClientTargetSection({
           </Input.Root>
         </div>
         <div>
-          <label
-            htmlFor="salesTarget"
+          <span
+            // htmlFor="salesTarget"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
             Bônus (R$)
-          </label>
+          </span>
           <Input.Root>
             <Input.Prefix>
               <BanknoteIcon className="w-4 h-4" />

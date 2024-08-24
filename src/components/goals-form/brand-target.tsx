@@ -3,7 +3,13 @@
 import { Button } from '@/components/Button'
 import * as Input from '@/components/Input'
 import { BrandTarget, Goal } from '@/context/models/goals'
-import { BanknoteIcon, PlusIcon } from 'lucide-react'
+import {
+  BanknoteIcon,
+  PlusIcon,
+  PencilIcon,
+  CheckIcon,
+  XIcon,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 interface BrandTargetSectionProps {
@@ -21,11 +27,11 @@ export default function BrandTargetSection({
   const [searchResults, setSearchResults] = useState<
     { brandId: string; brandName: string }[]
   >([])
+  const [editingBrandId, setEditingBrandId] = useState<string | null>(null)
+  const [editingTarget, setEditingTarget] = useState<string | number>('')
 
   const handleAddBrand = () => {
     if (newBrand && newBrand.target !== 0 && newBrand.target !== undefined) {
-      // Aplicar parseFloat ao valor de target
-
       const updatedBrand = {
         ...newBrand,
         target: parseFloat(newBrand.target.toString().replace(/\D/g, '')) / 100,
@@ -69,6 +75,38 @@ export default function BrandTargetSection({
     }))
   }
 
+  const handleEditBrand = (brandId: string) => {
+    const brand = formState.brandTargets?.find(
+      (brand) => brand.brandId === brandId,
+    )
+    if (brand) {
+      setEditingBrandId(brandId)
+      setEditingTarget(brand.target * 100)
+    }
+  }
+
+  const handleSaveEdit = () => {
+    setFormState((prevState) => ({
+      ...prevState,
+      brandTargets: prevState.brandTargets?.map((brand) =>
+        brand.brandId === editingBrandId
+          ? {
+              ...brand,
+              target:
+                parseFloat(editingTarget.toString().replace(/\D/g, '')) / 100,
+            }
+          : brand,
+      ),
+    }))
+    setEditingBrandId(null)
+    setEditingTarget('')
+  }
+
+  const handleCancelEdit = () => {
+    setEditingBrandId(null)
+    setEditingTarget('')
+  }
+
   const fetchBrands = async (filter: string) => {
     try {
       const response = await fetch(
@@ -99,8 +137,6 @@ export default function BrandTargetSection({
       setSearchResults([])
     }
   }, [newBrand?.brandName])
-
-  console.log(formState.bonusGoalBrand)
 
   return (
     <div className="pt-5">
@@ -134,7 +170,6 @@ export default function BrandTargetSection({
         </div>
       </div>
 
-      {/* Campo de Nome da Marca com Pesquisa */}
       <div className="flex gap-3 pt-5">
         <Input.Root>
           <Input.Control
@@ -177,7 +212,6 @@ export default function BrandTargetSection({
         </Button>
       </div>
 
-      {/* Resultados da Pesquisa */}
       {searchResults.length > 0 && (
         <div className="pt-3 space-y-3 max-h-48 overflow-y-auto">
           {searchResults.map((brand) => (
@@ -194,29 +228,73 @@ export default function BrandTargetSection({
         </div>
       )}
 
-      {/* Listagem das Marcas Selecionadas */}
       <div className="pt-5 space-y-3">
         {formState.brandTargets?.map((brand: BrandTarget) => (
           <div
             key={brand.brandId}
             className="flex items-center justify-between p-3 border rounded-md dark:border-zinc-700"
           >
-            <span>
-              {brand.brandName} - {brand.brandId}
-            </span>
-            <span>
-              {brand.target.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              })}
-            </span>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => handleRemoveBrand(brand.brandId)}
-            >
-              Remover
-            </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-96">
+                <span>
+                  {brand.brandName} - {brand.brandId}
+                </span>
+              </div>
+              <div>
+                {editingBrandId === brand.brandId ? (
+                  <Input.Root>
+                    <Input.Control
+                      id="editingTarget"
+                      type="currency"
+                      value={editingTarget}
+                      onChange={(e) => setEditingTarget(e.target.value)}
+                    />
+                  </Input.Root>
+                ) : (
+                  <span>
+                    {brand.target.toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {editingBrandId === brand.brandId ? (
+                <>
+                  <Button
+                    variant="primary"
+                    type="button"
+                    onClick={handleSaveEdit}
+                  >
+                    <CheckIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={handleCancelEdit}
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleEditBrand(brand.brandId)}
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => handleRemoveBrand(brand.brandId)}
+              >
+                Remover
+              </Button>
+            </div>
           </div>
         ))}
       </div>

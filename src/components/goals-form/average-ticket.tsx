@@ -21,12 +21,12 @@ export default function AverageTicketSection({
   return (
     <div className="flex flex-col lg:flex-row lg:items-center gap-3">
       <div className="flex flex-col flex-grow">
-        <label
-          htmlFor="averageTicket"
+        <span
+          // htmlFor="averageTicket"
           className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Meta de Ticket Médio (R$)
-        </label>
+        </span>
         <Input.Root>
           <Input.Prefix>
             <BanknoteIcon className="w-4 h-4" />
@@ -47,12 +47,12 @@ export default function AverageTicketSection({
         </Input.Root>
       </div>
       <div className="flex flex-col w-28">
-        <label
-          htmlFor="averageTicketBonus"
+        <span
+          // htmlFor="averageTicketBonus"
           className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Bônus (R$)
-        </label>
+        </span>
         <Input.Root>
           <Input.Control
             id="averageTicketTarget.bonus"

@@ -21,12 +21,12 @@ export default function CancellationRateSection({
   return (
     <div className="flex flex-col lg:flex-row lg:items-center gap-3">
       <div className="flex flex-col flex-grow">
-        <label
-          htmlFor="cancellationRate"
+        <span
+          // htmlFor="cancellationRate"
           className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Taxa de Can/Dev Máxima (%)
-        </label>
+        </span>
         <Input.Root>
           <Input.Prefix>
             <PercentIcon className="w-4 h-4" />
@@ -47,12 +47,12 @@ export default function CancellationRateSection({
         </Input.Root>
       </div>
       <div className="flex flex-col w-28">
-        <label
-          htmlFor="cancellationBonus"
+        <span
+          // htmlFor="cancellationBonus"
           className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Bônus (R$)
-        </label>
+        </span>
         <Input.Root>
           <Input.Control
             id="cancellationRate.bonus"

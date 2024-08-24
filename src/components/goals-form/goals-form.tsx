@@ -14,6 +14,18 @@ import NewCustomersTargetSection from './new-customers-target'
 import SalesTargetSection from './sales-target'
 import SpecificClientTargetSection from './specific-client-target'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import _ from 'lodash'
+import { useRouter } from 'next/navigation'
+
 export interface GoalProps {
   params: {
     id: string
@@ -49,6 +61,10 @@ const years = Array.from({ length: 10 }, (_, i) => {
 export default function GoalsForm({ params, mode }: GoalsFormProps) {
   const { fetchGoalsByGoalId, goals } = useSeller()
   const [formState, setFormState] = useState<Goal>(GoalStartValue)
+  const [initialFormState, setInitialFormState] = useState<Goal>(GoalStartValue)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [dialogMessage, setDialogMessage] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
     if (mode === 'update') {
@@ -60,8 +76,10 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
   useEffect(() => {
     if (goals && mode === 'update') {
       setFormState(goals)
+      setInitialFormState(goals)
     } else {
       setFormState(GoalStartValue)
+      setInitialFormState(GoalStartValue)
     }
   }, [goals, mode])
 
@@ -100,8 +118,18 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
     })
   }
 
+  const hasChanges = () => {
+    return !_.isEqual(formState, initialFormState)
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
+
+    if (!hasChanges()) {
+      setDialogMessage('Nenhuma alteração foi feita.')
+      setIsDialogOpen(true)
+      return
+    }
 
     const payload = {
       id: formState.id === '' ? undefined : formState.id,
@@ -154,7 +182,7 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
         : undefined,
       brandTargets: formState.brandTargets?.map((brand) => ({
         ...brand,
-        target: brand.target / 100,
+        target: brand.target,
       })),
       bonusGoalBrand: formState.bonusGoalBrand / 100,
     }
@@ -166,8 +194,6 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
           : `${process.env.NEXT_PUBLIC_API_URL}/v1/goals/create`
 
       const method = mode === 'update' ? 'PUT' : 'POST'
-
-      console.log(payload)
 
       const response = await fetch(url, {
         method,
@@ -183,16 +209,23 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
         )
       }
 
-      console.log(payload)
-
-      // const result = await response.json()
-      // console.log(result)
-      alert(
+      setDialogMessage(
         `Metas ${mode === 'update' ? 'atualizadas' : 'criadas'} com sucesso!`,
       )
     } catch (error) {
       console.error('Erro:', error)
-      alert(`Erro ao ${mode === 'update' ? 'atualizar' : 'criar'} as metas.`)
+      setDialogMessage(
+        `Erro ao ${mode === 'update' ? 'atualizar' : 'criar'} as metas.`,
+      )
+    } finally {
+      setIsDialogOpen(true)
+    }
+  }
+
+  const handleDialogConfirm = () => {
+    setIsDialogOpen(false)
+    if (dialogMessage.includes('sucesso')) {
+      router.back() // Retornar para a página anterior apenas em caso de sucesso
     }
   }
 
@@ -216,7 +249,11 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" type="button">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => router.back()}
+            >
               Cancel
             </Button>
             <Button variant="primary" type="submit" form="settings">
@@ -234,13 +271,15 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
           {/* Month and Year Selects */}
           <div className="flex gap-3 pt-5">
             <div className="flex flex-col gap-2 w-40">
-              <label
-                htmlFor="month"
+              <span
+                // htmlFor="month"
                 className="text-zinc-900 dark:text-zinc-100"
               >
                 Mês
-              </label>
+              </span>
               <Select
+                key="month"
+                name="month"
                 placeholder="Selecione o mês"
                 value={String(formState.month)}
                 onValueChange={(value) =>
@@ -258,13 +297,15 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
               </Select>
             </div>
             <div className="flex flex-col gap-2 w-40">
-              <label
-                htmlFor="year"
+              <span
+                // htmlFor="year"
                 className="text-zinc-900 dark:text-zinc-100"
               >
                 Ano
-              </label>
+              </span>
               <Select
+                key="year"
+                name="year"
                 placeholder="Selecione o ano"
                 value={String(formState.year)}
                 onValueChange={(value) =>
@@ -327,7 +368,11 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-2 pt-5">
-            <Button variant="outline" type="button">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => router.back()}
+            >
               Cancel
             </Button>
             <Button variant="primary" type="submit" form="settings">
@@ -336,6 +381,22 @@ export default function GoalsForm({ params, mode }: GoalsFormProps) {
           </div>
         </form>
       </div>
+
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {mode === 'update' ? 'Atualização' : 'Cadastro'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>{dialogMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleDialogConfirm}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
