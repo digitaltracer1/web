@@ -76,6 +76,11 @@ export function SellerProvider({ children }: SellerProviderProps) {
     sellerId: string,
   ) => {
     setLoadingState('fetchSaleSellerData', true)
+
+    // Limpa os dados antigos
+    setSummary(undefined)
+    setSellerInfo(undefined)
+
     try {
       const [result, summaryResult] = await Promise.all([
         fetch(`${urlBaseApi}/v1/siac/sale-by-coordinates`, {
@@ -87,7 +92,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
             filter: 'amount',
           }),
           headers: { 'Content-Type': 'application/json' },
-          cache: 'force-cache',
+          cache: 'no-cache',
           next: { revalidate: 1800 },
         }),
         fetch(`${urlBaseApi}/v1/siac/sales-summary`, {
@@ -99,7 +104,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
             filter: 'amount',
           }),
           headers: { 'Content-Type': 'application/json' },
-          cache: 'force-cache',
+          cache: 'no-cache',
           next: { revalidate: 1800 },
         }),
       ])
@@ -144,7 +149,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
           filter: 'amount',
         }),
         headers: { 'Content-Type': 'application/json' },
-        cache: 'force-cache',
+        cache: 'no-cache',
         next: { revalidate: 1800 },
       })
 
@@ -168,7 +173,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
           filter: 'amount',
         }),
         headers: { 'Content-Type': 'application/json' },
-        cache: 'force-cache',
+        cache: 'no-cache',
         next: { revalidate: 1800 },
       })
 
@@ -198,7 +203,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
             filter: 'amount',
           }),
           headers: { 'Content-Type': 'application/json' },
-          cache: 'force-cache',
+          cache: 'no-cache',
           next: { revalidate: 1800 },
         },
       )
@@ -220,17 +225,19 @@ export function SellerProvider({ children }: SellerProviderProps) {
       const dateTo = new Date()
       dateTo.setMonth(dateTo.getMonth() + 6)
 
+      console.log(urlBaseApi)
       const result = await fetch(
         `${urlBaseApi}/v1/siac/clients-inactive?sellerId=${sellerId}`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-          cache: 'force-cache',
+          cache: 'no-cache',
           next: { revalidate: 1800 },
         },
       )
 
       const clientsInactive = await result.json()
+      console.log(clientsInactive)
 
       setClientInactive(clientsInactive)
     } finally {

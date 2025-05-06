@@ -17,18 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import * as XLSX from 'xlsx'
-
-interface Client {
-  clientId: string
-  clientName: string
-  businessName: string
-  state: string
-  areaCode: string
-  phoneNumber: string
-  createdAt: string
-  lastPurchase: string
-  status: string
-}
+import { InactiveClientReport } from '@/context/models/inactive-client-report'
 
 interface SeriesData {
   x: string
@@ -41,6 +30,9 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
   const [series, setSeries] = useState<{ name: string; data: SeriesData[] }[]>(
     [],
   )
+
+  type Client = InactiveClientReport
+
   const [selectedData, setSelectedData] = useState<{
     period: string
     clients: Client[]
@@ -55,18 +47,19 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
 
   useEffect(() => {
     if (clientsInactive.length > 0) {
+      console.log(clientsInactive)
       const now = new Date()
       const startDate = new Date(now.getFullYear(), now.getMonth() - 7, 1)
 
       const filteredClients = clientsInactive.filter((client) => {
-        const lastPurchaseDate = new Date(client.lastPurchase)
+        const lastPurchaseDate = new Date(client.lastPurchaseWithSeller)
         return lastPurchaseDate >= startDate
       })
 
       const grouped = filteredClients.reduce(
         (acc, client) => {
-          if (client.lastPurchase) {
-            const date = new Date(client.lastPurchase)
+          if (client.lastPurchaseWithSeller) {
+            const date = new Date(client.lastPurchaseWithSeller)
             const period = date.toLocaleDateString('pt-BR', {
               year: 'numeric',
               month: 'short',
@@ -135,16 +128,26 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
         DDD: client.areaCode,
         Telefone: client.phoneNumber,
         'Data Criação': new Date(client.createdAt).toLocaleDateString('pt-BR'),
-        'Ultima Compra': new Date(client.lastPurchase).toLocaleDateString(
-          'pt-BR',
-        ),
-        status: client.status,
+        'Vendedor da Última Compra': client.sellerWithLastPurchase,
+        'Pedido com Vendedor': client.orderWithSeller,
+        'Última Compra com Vendedor': new Date(
+          client.lastPurchaseWithSeller,
+        ).toLocaleDateString('pt-BR'),
+        'Vendedor da Última Compra na Loja': client.sellerOfLastPurchase,
+        'Pedido Última Compra': client.orderLastPurchase,
+        'Última Compra na Loja': new Date(
+          client.lastPurchaseInStore,
+        ).toLocaleDateString('pt-BR'),
+        Status: client.status,
       })),
     )
 
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Clientes Inativos')
-    XLSX.writeFile(workbook, `clientes-inativos-${selectedData.period}.xlsx`)
+    XLSX.writeFile(
+      workbook,
+      `clientes-inativos-${selectedData.period}-${id}.xlsx`,
+    )
   }
 
   return (
@@ -153,7 +156,7 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
 
       {selectedData && (
         <div className="fixed z-50 inset-0 bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg max-w-4xl w-full">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg max-w-7xl w-full">
             <h2 className="text-2xl font-bold mb-6 text-center">
               Clientes Inativos em {selectedData.period}
             </h2>
@@ -179,6 +182,8 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
                         <TableHead>Empresa</TableHead>
                         <TableHead>Estado</TableHead>
                         <TableHead>Última Compra</TableHead>
+                        <TableHead>Vendedor</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -190,10 +195,12 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
                           <TableCell>{client.businessName}</TableCell>
                           <TableCell>{client.state}</TableCell>
                           <TableCell>
-                            {new Date(client.lastPurchase).toLocaleDateString(
-                              'pt-BR',
-                            )}
+                            {new Date(
+                              client.lastPurchaseWithSeller,
+                            ).toLocaleDateString('pt-BR')}
                           </TableCell>
+                          <TableCell>{client.sellerWithLastPurchase}</TableCell>
+                          <TableCell>{client.status}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

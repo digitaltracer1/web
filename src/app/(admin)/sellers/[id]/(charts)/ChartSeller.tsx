@@ -9,7 +9,7 @@ import { useEffect } from 'react'
 
 export default function ChartSeller({ params }: SellerProps) {
   const {
-    // fetchSalesSeller,
+    fetchSalesSeller,
     dateRange,
     summarySeller,
     goals,
@@ -21,7 +21,8 @@ export default function ChartSeller({ params }: SellerProps) {
     const year = new Date(dateRange.dateFrom).getFullYear()
     const sellerId = params.id
 
-    // fetchSalesSeller(dateRange.dateFrom, dateRange.dateTo, params.id)
+    // Recarrega os dados de vendas e metas
+    fetchSalesSeller(dateRange.dateFrom, dateRange.dateTo, sellerId)
     fetchGoalsBySeller(month, year, sellerId)
   }, [dateRange.dateFrom, dateRange.dateTo, params.id])
 

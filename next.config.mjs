@@ -16,7 +16,7 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: [
         'localhost:3002',
-        'localhost:5000',
+        'http://localhost:5000',
         'digitaltracer.ddns.com.br',
       ],
     },
