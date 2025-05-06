@@ -36,7 +36,7 @@ interface SellerContextType {
   fetchSalesByClients: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   fetchSalesByGroup: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   findClientById: (clientId: string) => void
-  fetchClientsInactive: () => void
+  fetchClientsInactive: (sellerId: string) => void
   fetchNewClients: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   fetchSalesSeller: (dateFrom: Date, dateTo: Date, sellerId: string) => void
   updateDateRange: (dateFrom: Date, dateTo: Date) => void
@@ -211,7 +211,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
     }
   }
 
-  const fetchClientsInactive = async () => {
+  const fetchClientsInactive = async (sellerId: string) => {
     setLoadingState('fetchClientsInactive', true)
     try {
       const dateFrom = new Date()
@@ -220,12 +220,15 @@ export function SellerProvider({ children }: SellerProviderProps) {
       const dateTo = new Date()
       dateTo.setMonth(dateTo.getMonth() + 6)
 
-      const result = await fetch(`${urlBaseApi}/v1/siac/clients-inactive`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'force-cache',
-        next: { revalidate: 1800 },
-      })
+      const result = await fetch(
+        `${urlBaseApi}/v1/siac/clients-inactive?sellerId=${sellerId}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'force-cache',
+          next: { revalidate: 1800 },
+        },
+      )
 
       const clientsInactive = await result.json()
 

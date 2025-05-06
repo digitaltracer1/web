@@ -32,10 +32,13 @@ const maxRange: number = 1
 const initials = (firstname: string, lastname: string) =>
   (firstname[0] + lastname[0]).toUpperCase()
 
+const safeChar = (s: string) => (s && s[0] ? s[0].toLowerCase() : 'a') // fallback seguro
+
 const colorByUser = ({ firstName, lastName }: IUser): string => {
-  const userValue =
-    getByteLength(firstName[0].toLowerCase()) /
-    getByteLength(lastName[0].toLowerCase())
+  const firstChar = safeChar(firstName)
+  const lastChar = safeChar(lastName)
+
+  const userValue = getByteLength(firstChar) / getByteLength(lastChar)
 
   return `hsl(${map(userValue, minRange, maxRange, 0, 360)},50%,50%)`
 }

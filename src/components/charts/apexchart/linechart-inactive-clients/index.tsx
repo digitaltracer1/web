@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/Button'
 import { useSeller } from '@/context/seller-context'
+import * as ScrollArea from '@radix-ui/react-scroll-area'
 import {
   Table,
   TableBody,
@@ -15,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import * as ScrollArea from '@radix-ui/react-scroll-area'
+import * as XLSX from 'xlsx'
 
 interface Client {
   clientId: string
@@ -26,6 +27,7 @@ interface Client {
   phoneNumber: string
   createdAt: string
   lastPurchase: string
+  status: string
 }
 
 interface SeriesData {
@@ -61,7 +63,7 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
         return lastPurchaseDate >= startDate
       })
 
-      const groupedData = filteredClients.reduce(
+      const grouped = filteredClients.reduce(
         (acc, client) => {
           if (client.lastPurchase) {
             const date = new Date(client.lastPurchase)
@@ -72,26 +74,7 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
             if (!acc[period]) {
               acc[period] = { period, clients: [], count: 0 }
             }
-
-            // Verificar se as datas são válidas antes de convertê-las
-            const createdAt = new Date(client.createdAt)
-            const lastPurchase = new Date(client.lastPurchase)
-            const isValidDate = (date: Date) => !isNaN(date.getTime())
-
-            acc[period].clients.push({
-              clientId: client.clientId,
-              clientName: client.clientName,
-              businessName: client.businessName,
-              state: client.state,
-              areaCode: client.areaCode,
-              phoneNumber: client.phoneNumber,
-              createdAt: isValidDate(createdAt)
-                ? createdAt.toISOString()
-                : client.createdAt,
-              lastPurchase: isValidDate(lastPurchase)
-                ? lastPurchase.toISOString()
-                : client.lastPurchase,
-            })
+            acc[period].clients.push(client)
             acc[period].count += 1
           }
           return acc
@@ -102,20 +85,18 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
         >,
       )
 
-      const data = Object.values(groupedData).map((item) => ({
+      const data = Object.values(grouped).map((item) => ({
         x: item.period,
         y: item.count,
       }))
 
-      setGroupedData(groupedData)
+      setGroupedData(grouped)
       setSeries([{ name: 'Clientes Inativos', data }])
     }
   }, [clientsInactive])
 
   const chartOptions: ApexOptions = {
-    theme: {
-      mode: theme === 'light' ? 'light' : 'dark',
-    },
+    theme: { mode: theme === 'light' ? 'light' : 'dark' },
     chart: {
       type: 'bar',
       height: 350,
@@ -124,94 +105,94 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
         dataPointSelection: (event, chartContext, config) => {
           const selectedPeriod = series[0].data[config.dataPointIndex].x
           const selectedClients = groupedData[selectedPeriod]?.clients || []
-          setSelectedData({
-            period: selectedPeriod,
-            clients: selectedClients,
-          })
+          setSelectedData({ period: selectedPeriod, clients: selectedClients })
         },
       },
     },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: '50%',
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      show: true,
-      width: 2,
-      colors: ['transparent'],
-    },
-    title: {
-      text: 'Relatório de Clientes Inativos',
-      align: 'left',
-    },
+    plotOptions: { bar: { horizontal: false, columnWidth: '50%' } },
+    dataLabels: { enabled: false },
+    stroke: { show: true, width: 2, colors: ['transparent'] },
+    title: { text: 'Relatório de Clientes Inativos', align: 'left' },
     xaxis: {
       categories: series.length > 0 ? series[0].data.map((item) => item.x) : [],
-      labels: {
-        show: false,
-      },
-      title: {
-        text: 'Período',
-      },
+      labels: { show: false },
+      title: { text: 'Período' },
     },
-    yaxis: {
-      title: {
-        text: 'Número de Clientes Inativos',
-      },
-    },
-    fill: {
-      opacity: 1,
-    },
-    tooltip: {
-      y: {
-        formatter: function (value) {
-          return `${value} clientes`
-        },
-      },
-    },
+    yaxis: { title: { text: 'Número de Clientes Inativos' } },
+    fill: { opacity: 1 },
+    tooltip: { y: { formatter: (value) => `${value} clientes` } },
+  }
+
+  const exportToExcel = () => {
+    if (!selectedData) return
+
+    const worksheet = XLSX.utils.json_to_sheet(
+      selectedData.clients.map((client) => ({
+        ID: client.clientId,
+        Nome: client.clientName,
+        Empresa: client.businessName,
+        Estado: client.state,
+        DDD: client.areaCode,
+        Telefone: client.phoneNumber,
+        'Data Criação': new Date(client.createdAt).toLocaleDateString('pt-BR'),
+        'Ultima Compra': new Date(client.lastPurchase).toLocaleDateString(
+          'pt-BR',
+        ),
+        status: client.status,
+      })),
+    )
+
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Clientes Inativos')
+    XLSX.writeFile(workbook, `clientes-inativos-${selectedData.period}.xlsx`)
   }
 
   return (
     <div className="relative flex flex-col h-full w-full">
       <Chart options={chartOptions} series={series} type="bar" height="100%" />
+
       {selectedData && (
-        <div className="fixed z-50 inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-lg max-w-lg w-full">
-            <h2 className="text-xl font-semibold mb-4">
+        <div className="fixed z-50 inset-0 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg max-w-4xl w-full">
+            <h2 className="text-2xl font-bold mb-6 text-center">
               Clientes Inativos em {selectedData.period}
             </h2>
-            <ScrollArea.Root
-              className="w-full h-[38rem] overflow-hidden"
-              type="scroll"
-            >
-              <ScrollArea.Viewport className="w-full h-full rounded overflow-y-scroll">
-                <div className="table-container">
-                  <Table className="w-full">
-                    <TableCaption>
-                      Clientes Inativos em {selectedData.period}
-                    </TableCaption>
-                    <TableHeader className="sticky top-0 bg-white dark:bg-gray-800 z-10">
+            <div className="flex justify-end gap-4 mb-4">
+              <Button variant="outline" onClick={exportToExcel}>
+                Baixar Excel
+              </Button>
+              <Button variant="primary" onClick={() => setSelectedData(null)}>
+                Fechar
+              </Button>
+            </div>
+
+            <ScrollArea.Root className="w-full h-[35rem] rounded overflow-hidden">
+              <ScrollArea.Viewport className="w-full h-full">
+                <div className="min-w-max w-fit">
+                  <Table className="w-full text-sm">
+                    <TableCaption>Lista de clientes</TableCaption>
+                    <TableHeader className="sticky top-0 z-20 bg-white dark:bg-gray-900 shadow-sm">
                       <TableRow>
-                        <TableHead>ID</TableHead>
                         <TableHead>Nome</TableHead>
                         <TableHead>DDD</TableHead>
                         <TableHead>Telefone</TableHead>
+                        <TableHead>Empresa</TableHead>
+                        <TableHead>Estado</TableHead>
                         <TableHead>Última Compra</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody className="text-xs">
+                    <TableBody>
                       {selectedData.clients.map((client, index) => (
                         <TableRow key={index}>
-                          <TableCell>{client.clientId}</TableCell>
                           <TableCell>{client.clientName}</TableCell>
                           <TableCell>{client.areaCode}</TableCell>
                           <TableCell>{client.phoneNumber}</TableCell>
+                          <TableCell>{client.businessName}</TableCell>
+                          <TableCell>{client.state}</TableCell>
                           <TableCell>
-                            {new Date(client.lastPurchase).toLocaleDateString()}
+                            {new Date(client.lastPurchase).toLocaleDateString(
+                              'pt-BR',
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -219,16 +200,11 @@ export default function InactiveClientsBarChart({ id }: { id: string }) {
                   </Table>
                 </div>
               </ScrollArea.Viewport>
-              <ScrollArea.Scrollbar
-                className="flex h-0.5 touch-none select-none flex-col bg-zinc-100"
-                orientation="vertical"
-              >
-                <ScrollArea.Thumb className="relative flex-1 rounded-lg bg-zinc-300" />
+
+              <ScrollArea.Scrollbar orientation="vertical">
+                <ScrollArea.Thumb className="bg-zinc-400 rounded-full" />
               </ScrollArea.Scrollbar>
             </ScrollArea.Root>
-            <Button variant="primary" onClick={() => setSelectedData(null)}>
-              Fechar
-            </Button>
           </div>
         </div>
       )}
